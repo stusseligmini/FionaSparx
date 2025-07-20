@@ -1,5 +1,4 @@
 import sqlite3
-import os
 from datetime import datetime
 
 class ContentDatabase:
@@ -30,4 +29,19 @@ class ContentDatabase:
             """, (text, image_bytes))
             conn.commit()
 
-    def get_unpublis_
+    def get_unpublished_content(self):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT id, text, image FROM content
+                WHERE published = 0
+            """)
+            return cursor.fetchall()
+
+    def mark_as_published(self, content_id):
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE content SET published = 1 WHERE id = ?
+            """, (content_id,))
+            conn.commit()

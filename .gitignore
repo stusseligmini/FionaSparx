@@ -2,3 +2,6 @@ __pycache__/
 .env
 *.pyc
 venv/
+src/logs/
+data/
+config/*.env

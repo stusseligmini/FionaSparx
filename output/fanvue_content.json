@@ -1,0 +1,20 @@
+[
+  {
+    "platform": "fanvue",
+    "image_path": "output/fanvue_content_1.png",
+    "caption": "Style is about feeling good in what you wear 🌟 #fanvue #fashion #style #confident #beautiful #elegant #chic #trendy #contentcreator #authentic #realme",
+    "prompt": "A confident young woman in casual lifestyle setting, natural lighting, authentic smile"
+  },
+  {
+    "platform": "fanvue",
+    "image_path": "output/fanvue_content_2.png",
+    "caption": "Every outfit tells a story - what's yours? 👗 #fanvue #fashion #style #confident #beautiful #elegant #chic #trendy #contentcreator #authentic #realme",
+    "prompt": "Stylish fashion photography, modern outfit, urban background, professional quality"
+  },
+  {
+    "platform": "fanvue",
+    "image_path": "output/fanvue_content_3.png",
+    "caption": "Feeling confident in my own skin and style today 💫 #fanvue #fashion #style #confident #beautiful #elegant #chic #trendy #contentcreator #authentic #realme",
+    "prompt": "Lifestyle moment, cozy home setting, natural authentic expression, soft lighting"
+  }
+]

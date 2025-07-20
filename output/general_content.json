@@ -1,0 +1,20 @@
+[
+  {
+    "platform": "general",
+    "image_path": "output/general_content_1.png",
+    "caption": "New places, new experiences, new me 🌍 #travel #adventure #explore #wanderlust #travelgram #ai #content #creator #authentic #life #instagood #photooftheday #beautiful #sunday #july",
+    "prompt": "A beautiful nature landscape with mountains and sky"
+  },
+  {
+    "platform": "general",
+    "image_path": "output/general_content_2.png",
+    "caption": "Life is too short not to live it to the fullest 🌟 #lifestyle #authenticity #dailylife #goodvibes #mindfulness #ai #content #creator #authentic #life #instagood #photooftheday #beautiful #sunday #july",
+    "prompt": "A cozy coffee shop interior with warm lighting"
+  },
+  {
+    "platform": "general",
+    "image_path": "output/general_content_3.png",
+    "caption": "Life is too short not to live it to the fullest 🌟 #lifestyle #authenticity #dailylife #goodvibes #mindfulness #ai #content #creator #authentic #life #instagood #photooftheday #beautiful #sunday #july",
+    "prompt": "An artistic still life with flowers and books"
+  }
+]

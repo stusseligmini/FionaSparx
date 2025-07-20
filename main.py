@@ -16,8 +16,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 # Importer våre moduler
-from src.ai_model.advanced_image_generator import AdvancedImageGenerator
-from src.ai_model.smart_text_generator import SmartTextGenerator
+from src.ai_model.image_generator import AdvancedImageGenerator
+from src.ai_model.text_generator import SmartTextGenerator
 from src.content.intelligent_content_manager import IntelligentContentManager
 from src.platforms.multi_platform_manager import MultiPlatformManager
 from src.data.enhanced_database import EnhancedDatabase

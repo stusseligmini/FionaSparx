@@ -1,0 +1,10 @@
+2025-07-20 16:40:19 | src.data.enhanced_database | INFO     | ✅ Database tabeller opprettet/oppdatert
+2025-07-20 16:40:19 | src.data.enhanced_database | INFO     | 🗄️  Enhanced Database initialisert: data/fiona_sparx.db
+2025-07-20 16:40:19 | src.ai_model.image_generator | INFO     | 💻 Bruker CPU
+2025-07-20 16:40:19 | src.ai_model.image_generator | ERROR    | ❌ Feil ved oppsett av pipeline: Cannot load model stabilityai/stable-diffusion-2-1: model is not cached locally and an error occurred while trying to fetch metadata from the Hub. Please check out the root cause in the stacktrace above.
+2025-07-20 16:40:19 | root                 | ERROR    | ❌ Feil ved initialisering: Cannot load model stabilityai/stable-diffusion-2-1: model is not cached locally and an error occurred while trying to fetch metadata from the Hub. Please check out the root cause in the stacktrace above.
+2025-07-20 16:40:23 | src.data.enhanced_database | INFO     | ✅ Database tabeller opprettet/oppdatert
+2025-07-20 16:40:23 | src.data.enhanced_database | INFO     | 🗄️  Enhanced Database initialisert: data/fiona_sparx.db
+2025-07-20 16:40:23 | src.ai_model.image_generator | INFO     | 💻 Bruker CPU
+2025-07-20 16:40:23 | src.ai_model.image_generator | ERROR    | ❌ Feil ved oppsett av pipeline: Cannot load model stabilityai/stable-diffusion-2-1: model is not cached locally and an error occurred while trying to fetch metadata from the Hub. Please check out the root cause in the stacktrace above.
+2025-07-20 16:40:23 | root                 | ERROR    | ❌ Feil ved initialisering: Cannot load model stabilityai/stable-diffusion-2-1: model is not cached locally and an error occurred while trying to fetch metadata from the Hub. Please check out the root cause in the stacktrace above.

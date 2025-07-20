@@ -1,3 +1,9 @@
-openai
-pandas
-scikit-learn
+torch>=2.0.0
+torchvision
+diffusers>=0.21.0
+transformers>=4.21.0
+accelerate
+pillow>=9.0.0
+requests
+schedule
+python-dotenv

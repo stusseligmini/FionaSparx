@@ -1,0 +1,20 @@
+[
+  {
+    "platform": "loyalfans",
+    "image_path": "output/loyalfans_content_1.png",
+    "caption": "Exclusive moments captured with artistic vision 🌟 #loyalfans #artistic #creative #unique #sophisticated #elegant #exclusive #premium #vip",
+    "prompt": "Artistic portrait photography, creative lighting, professional model pose, high fashion"
+  },
+  {
+    "platform": "loyalfans",
+    "image_path": "output/loyalfans_content_2.png",
+    "caption": "Premium content for those who appreciate the finer things 💎 #loyalfans #artistic #creative #unique #sophisticated #elegant #exclusive #premium #vip",
+    "prompt": "Elegant lifestyle scene, sophisticated setting, confident expression, artistic composition"
+  },
+  {
+    "platform": "loyalfans",
+    "image_path": "output/loyalfans_content_3.png",
+    "caption": "Art is the highest form of expression ✨ Creating something unique today #loyalfans #artistic #creative #unique #sophisticated #elegant #exclusive #premium #vip",
+    "prompt": "Creative fashion photography, unique styling, dramatic lighting, artistic atmosphere"
+  }
+]

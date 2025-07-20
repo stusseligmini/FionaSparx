@@ -1,3 +1,22 @@
+"""
+Advanced Image Generator with Quality Enhancements
+
+This module provides high-quality AI image generation with multiple style options,
+quality settings, and post-processing enhancements. Includes fallback mechanisms
+for robust operation even when models are unavailable.
+
+Key Features:
+- Multiple style options (realistic, artistic, cinematic, fashion, lifestyle)
+- Quality control (high, medium, fast)
+- Smart device detection (CUDA, Metal, CPU)
+- Post-processing enhancements
+- Performance tracking
+- Memory optimization
+
+Author: FionaSparx AI Content Creator  
+Version: 2.0.0 - Enhanced Quality
+"""
+
 import torch
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 from PIL import Image, ImageEnhance, ImageFilter

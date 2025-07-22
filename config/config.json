@@ -1,33 +1,51 @@
 {
   "ai_model": {
-    "image_model": "stabilityai/stable-diffusion-2-1",
-    "text_model": "gpt2",
+    "image_model": "runwayml/stable-diffusion-v1-5",
     "device": "auto",
-    "image_size": [768, 768],
-    "batch_size": 1,
-    "safety_checker": false
-  },
-  "content": {
-    "daily_posts": 5,
-    "content_types": ["image", "carousel", "story"],
-    "themes": ["lifestyle", "motivation", "fashion", "travel", "fitness"],
-    "auto_hashtags": true,
-    "max_hashtags": 30
+    "image_size": [512, 512],
+    "fallback_mode": true,
+    "max_retries": 3,
+    "timeout_seconds": 120
   },
   "platforms": {
-    "enabled": ["instagram", "twitter", "tiktok"],
-    "auto_publish": false,
-    "scheduling": true
+    "fanvue": {
+      "style": "lifestyle",
+      "tone": "authentic",
+      "max_hashtags": 20,
+      "enabled": true
+    },
+    "loyalfans": {
+      "style": "artistic",
+      "tone": "engaging",
+      "max_hashtags": 15,
+      "enabled": true
+    },
+    "instagram": {
+      "style": "lifestyle",
+      "tone": "friendly",
+      "max_hashtags": 30,
+      "enabled": true
+    }
   },
-  "scheduler": {
-    "post_times": ["08:00", "12:00", "17:00", "20:00"],
-    "timezone": "Europe/Oslo",
-    "auto_run": true
+  "monitoring": {
+    "enabled": true,
+    "metrics_interval": 60,
+    "health_check_interval": 30,
+    "performance_log_level": "INFO",
+    "max_history_size": 1000
   },
-  "database": {
-    "path": "data/fiona_sparx.db",
-    "backup_enabled": true,
-    "cleanup_old_content": true,
-    "retention_days": 30
+  "security": {
+    "api_key_rotation_days": 30,
+    "audit_logging": true,
+    "content_filtering": true,
+    "data_retention_days": 90
+  },
+  "error_handling": {
+    "circuit_breaker_enabled": true,
+    "circuit_breaker_failure_threshold": 5,
+    "circuit_breaker_timeout": 60,
+    "exponential_backoff_enabled": true,
+    "max_retries": 3,
+    "retry_delay_base": 1.0
   }
 }

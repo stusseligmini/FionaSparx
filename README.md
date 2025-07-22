@@ -1,38 +1,83 @@
-# FionaSparx AI Content Creator
+# FionaSparx AI Content Creator - Enterprise Edition
 
-AI Content Optimization for Social Platforms - **Optimized for Fanvue and LoyalFans**
+**Advanced AI Content Generation System for Social Platforms**
+*Optimized for Fanvue and LoyalFans with Enterprise-Grade Features*
 
 ## 🚀 Overview
 
-FionaSparx is an advanced AI-powered content creation system specifically optimized for Fanvue and LoyalFans platforms. It combines intelligent text generation with high-quality image creation to produce engaging, platform-specific content.
+FionaSparx Enterprise Edition is a robust, scalable AI-powered content creation system that combines intelligent text generation with high-quality image creation. Built with enterprise-grade features including advanced monitoring, error handling, and performance optimization.
 
-## ✨ Features
+## ✨ Enterprise Features
 
-- **🎨 AI Image Generation**: High-quality image creation with style optimization
-- **📝 Smart Text Generation**: Platform-specific captions and hashtags  
-- **🎯 Platform Optimization**: Tailored content for Fanvue and LoyalFans
-- **🔄 Fallback Mode**: Works even when AI models are unavailable
-- **📊 Content Analytics**: JSON metadata for all generated content
-- **🛡️ Error Handling**: Robust error handling and logging
+### 🔧 **Advanced Configuration Management**
+- **Schema validation** with comprehensive error checking
+- **Environment variable support** for sensitive data (FIONA_* prefix)
+- **Runtime configuration validation** and hot-reload capability
+- **Multi-environment support** with secure credential management
 
-## 🏗️ Architecture
+### 🛡️ **Circuit Breaker Pattern**
+- **Automatic failure detection** with configurable thresholds
+- **Graceful degradation** when AI services are unavailable
+- **Exponential backoff** for intelligent retry logic
+- **Health monitoring** and automatic recovery
+
+### 📊 **Performance Monitoring**
+- **Real-time metrics collection** for system resources
+- **AI operation performance tracking** with timing
+- **GPU memory monitoring** and optimization
+- **Export capabilities** for external monitoring systems
+
+### 🏥 **Health Check System**
+- **Comprehensive health monitoring** with configurable thresholds
+- **Multi-component health validation** (system, AI models, storage)
+- **Automated health reporting** with detailed diagnostics
+- **Proactive issue detection** and alerting
+
+### 🎨 **Enhanced CLI Interface**
+- **Rich progress bars** with real-time feedback
+- **Colored output** for better readability
+- **Interactive operation tracking** with detailed status
+- **Comprehensive error reporting** with suggestions
+
+### 🧪 **Testing Infrastructure**
+- **Unit tests** for all major components
+- **Integration tests** with mock services
+- **Performance benchmarks** and load testing
+- **Health check validation** and monitoring tests
+
+## 🏗️ Enterprise Architecture
 
 ```
-FionaSparx/
-├── main.py                    # Main entry point (NEW)
+FionaSparx Enterprise/
+├── main.py                         # Enterprise main entry point
+├── config/
+│   └── config.json                 # Enterprise configuration
 ├── src/
-│   ├── ai_model/
-│   │   ├── text_generator.py     # Enhanced with platform optimization
-│   │   ├── image_generator.py    # Advanced image generation
-│   │   ├── smart_text_generator.py    # Import bridge
-│   │   └── advanced_image_generator.py # Import bridge
-│   ├── content/
-│   ├── platforms/
+│   ├── ai_model/                   # AI generation components
+│   │   ├── text_generator.py       # Platform-optimized text generation
+│   │   ├── image_generator.py      # Advanced image generation with fallbacks
+│   │   ├── smart_text_generator.py # Import bridge
+│   │   └── advanced_image_generator.py
 │   ├── data/
-│   └── utils/
-├── output/                    # Generated content (NEW)
-├── requirements.txt           # Dependencies
-└── README.md                  # This file
+│   │   ├── config_validator.py     # NEW: Enterprise config validation
+│   │   ├── config_loader.py        # Legacy config loader
+│   │   └── enhanced_database.py    # Database management
+│   ├── utils/
+│   │   ├── circuit_breaker.py      # NEW: Circuit breaker pattern
+│   │   ├── performance_monitor.py  # NEW: Performance monitoring
+│   │   ├── health_check.py         # NEW: Health check system
+│   │   ├── enhanced_cli.py         # NEW: Enhanced CLI interface
+│   │   ├── logger.py               # Logging utilities
+│   │   └── scheduler.py            # Task scheduling
+│   ├── tests/
+│   │   └── test_framework.py       # NEW: Comprehensive testing
+│   ├── content/                    # Content management
+│   └── platforms/                  # Platform integrations
+├── output/                         # Generated content with metadata
+├── logs/                           # Enterprise logging and reports
+│   ├── health_report.json          # Automated health reports
+│   └── performance_metrics.json    # Performance data exports
+└── requirements.txt                # Dependencies
 ```
 
 ## 🚀 Quick Start
@@ -50,239 +95,242 @@ FionaSparx/
    pip install -r requirements.txt
    ```
 
-3. **Test the system**:
+3. **Test the enterprise system**:
    ```bash
    python main.py test
    ```
 
-### Basic Usage
+### Enterprise Commands
 
 ```bash
-# Test all components
-python main.py test
+# System Health & Monitoring
+python main.py health              # Check comprehensive system health
+python main.py performance         # View performance metrics and analytics
+python main.py config              # Validate configuration
+python main.py run-tests           # Run comprehensive test suite
 
-# Generate general content
-python main.py generate
+# Content Generation (Enhanced)
+python main.py fanvue              # Generate Fanvue-optimized content
+python main.py loyalfans           # Generate LoyalFans-optimized content
+python main.py generate            # Generate general content
 
-# Generate Fanvue-optimized content
-python main.py fanvue
-
-# Generate LoyalFans-optimized content  
-python main.py loyalfans
+# Legacy Support
+python main.py test                # Test all components
 ```
+
+## 🔧 Enterprise Configuration
+
+### Environment Variables
+
+Configure sensitive settings using environment variables:
+
+```bash
+# AI Model Configuration
+export FIONA_AI_DEVICE="cuda"
+export FIONA_AI_FALLBACK_MODE="true"
+export FIONA_AI_MAX_RETRIES="5"
+
+# Monitoring Configuration
+export FIONA_MONITORING_ENABLED="true"
+export FIONA_MONITORING_METRICS_INTERVAL="30"
+
+# Security Configuration
+export FIONA_SECURITY_AUDIT_LOGGING="true"
+export FIONA_SECURITY_CONTENT_FILTERING="true"
+
+# Circuit Breaker Configuration
+export FIONA_ERROR_CIRCUIT_BREAKER_ENABLED="true"
+```
+
+### Configuration File
+
+Enhanced `config/config.json` with enterprise features:
+
+```json
+{
+  "ai_model": {
+    "image_model": "runwayml/stable-diffusion-v1-5",
+    "device": "auto",
+    "fallback_mode": true,
+    "max_retries": 3,
+    "timeout_seconds": 120
+  },
+  "monitoring": {
+    "enabled": true,
+    "metrics_interval": 60,
+    "health_check_interval": 30,
+    "performance_log_level": "INFO",
+    "max_history_size": 1000
+  },
+  "error_handling": {
+    "circuit_breaker_enabled": true,
+    "circuit_breaker_failure_threshold": 5,
+    "circuit_breaker_timeout": 60,
+    "exponential_backoff_enabled": true,
+    "max_retries": 3
+  },
+  "security": {
+    "audit_logging": true,
+    "content_filtering": true,
+    "data_retention_days": 90
+  }
+}
+```
+
+## 📊 Monitoring & Analytics
+
+### Performance Metrics
+
+Real-time monitoring includes:
+- **System Resources**: CPU, memory, disk, GPU utilization
+- **AI Operations**: Execution times, success rates, error counts
+- **Circuit Breaker Status**: Health of all resilience components
+- **Content Generation**: Performance tracking per platform
+
+### Health Checks
+
+Automated health monitoring covers:
+- **System Resources**: Configurable thresholds for warnings/critical alerts
+- **Directory Access**: Validation of required file system permissions
+- **AI Model Availability**: Real-time testing of AI components
+- **Configuration Validity**: Runtime validation of all settings
+
+### Reporting
+
+- **Health Reports**: Automated exports to `logs/health_report.json`
+- **Performance Metrics**: Detailed analytics in `logs/performance_metrics.json`
+- **Content Metadata**: Enhanced tracking in `output/` directory
+
+## 🛡️ Enterprise Resilience
+
+### Circuit Breaker Pattern
+
+Automatic protection against cascade failures:
+- **Text Generation Circuit**: Protects smart text generation
+- **Image Generation Circuit**: Safeguards image creation
+- **Configurable Thresholds**: Customizable failure limits
+- **Automatic Recovery**: Smart half-open state testing
+
+### Error Handling
+
+Comprehensive error management:
+- **Exponential Backoff**: Intelligent retry strategies
+- **Graceful Degradation**: Fallback modes for all components
+- **Detailed Logging**: Comprehensive error tracking
+- **User-Friendly Messages**: Clear error communication
 
 ## 🎯 Platform-Specific Features
 
 ### Fanvue Optimization
-
 - **Style**: Authentic, lifestyle-focused content
 - **Tone**: Friendly, relatable, genuine
 - **Hashtags**: Platform-specific tags like `#fanvue`, `#authentic`, `#realme`
 - **Content Types**: Lifestyle, fashion, fitness with natural appeal
 
-**Example Fanvue Content**:
-```json
-{
-  "platform": "fanvue",
-  "caption": "Just being my authentic self today 💫 What makes you feel most confident? #fanvue #lifestyle #authentic #realme #dailylife",
-  "prompt": "A confident young woman in casual lifestyle setting, natural lighting, authentic smile"
-}
-```
-
 ### LoyalFans Optimization  
-
 - **Style**: Sophisticated, artistic, premium
 - **Tone**: Elegant, exclusive, refined
 - **Hashtags**: Premium tags like `#loyalfans`, `#exclusive`, `#premium`, `#vip`
 - **Content Types**: Artistic portraits, high fashion, luxury lifestyle
 
-**Example LoyalFans Content**:
-```json
-{
-  "platform": "loyalfans", 
-  "caption": "Art is the highest form of expression ✨ Creating something unique today #loyalfans #artistic #creative #unique #sophisticated",
-  "prompt": "Artistic portrait photography, creative lighting, professional model pose, high fashion"
-}
-```
+## 🧪 Testing & Quality Assurance
 
-## 🎨 Content Generation Features
-
-### Smart Text Generation
-
-The enhanced text generator includes:
-
-- **Platform Detection**: Automatically optimizes content for target platform
-- **Context Analysis**: Understands image context for relevant captions
-- **Dynamic Hashtags**: Platform-specific hashtag optimization
-- **Tone Adaptation**: Adjusts writing style per platform requirements
-
-### Advanced Image Generation
-
-- **Style Control**: Realistic, artistic, cinematic, fashion, lifestyle styles
-- **Quality Settings**: High, medium, fast generation modes
-- **Post-Processing**: Automatic image enhancement for quality
-- **Fallback Mode**: Placeholder generation when AI models unavailable
-
-## 📊 Output Structure
-
-Generated content is saved in the `output/` directory:
-
-```
-output/
-├── fanvue_content_1.png       # Generated images
-├── fanvue_content_2.png
-├── fanvue_content_3.png
-├── fanvue_content.json        # Metadata and captions
-├── loyalfans_content_1.png
-├── loyalfans_content_2.png  
-├── loyalfans_content_3.png
-├── loyalfans_content.json
-├── general_content_1.png
-├── general_content_2.png
-├── general_content_3.png
-├── general_content.json
-└── test_image.png             # Test output
-```
-
-## 🔧 Configuration
-
-The system uses smart defaults but can be customized:
-
-```python
-config = {
-    "ai_model": {
-        "image_model": "runwayml/stable-diffusion-v1-5",
-        "device": "auto",  # auto, cuda, cpu
-        "image_size": [512, 512]
-    },
-    "platforms": {
-        "fanvue": {
-            "style": "lifestyle",
-            "tone": "authentic", 
-            "max_hashtags": 20
-        },
-        "loyalfans": {
-            "style": "artistic",
-            "tone": "engaging",
-            "max_hashtags": 15
-        }
-    }
-}
-```
-
-## 🛡️ Error Handling & Fallback
-
-The system includes robust error handling:
-
-- **Network Issues**: Works offline with cached models
-- **Missing Models**: Generates placeholder content in fallback mode
-- **GPU Unavailable**: Automatically switches to CPU mode
-- **Generation Failures**: Provides fallback captions and images
-
-## 📝 API Reference
-
-### Main Classes
-
-#### `FionaSparxSimple`
-Main entry point class with platform-optimized content generation.
-
-**Methods**:
-- `test_components()`: Test all system components
-- `generate_fanvue_content()`: Generate Fanvue-optimized content
-- `generate_loyalfans_content()`: Generate LoyalFans-optimized content
-- `generate_general_content()`: Generate general-purpose content
-
-#### `SmartTextGenerator` (Enhanced)
-Intelligent text generation with platform optimization.
-
-**Key Features**:
-- Platform-specific templates for Fanvue and LoyalFans
-- Context-aware category detection
-- Dynamic hashtag generation
-- Tone and style adaptation
-
-#### `AdvancedImageGenerator`
-High-quality AI image generation with multiple styles and quality settings.
-
-## 🧪 Testing
-
-Run the comprehensive test suite:
+### Comprehensive Testing
 
 ```bash
-python main.py test
+# Run full test suite
+python main.py run-tests
+
+# Run specific test categories
+python -m src.tests.test_framework config      # Configuration tests
+python -m src.tests.test_framework circuit_breaker  # Circuit breaker tests
+python -m src.tests.test_framework performance # Performance monitoring tests
+python -m src.tests.test_framework health      # Health check tests
 ```
 
-This tests:
-- Text generation functionality
-- Image generation (or fallback mode)
-- Platform-specific optimizations
-- File I/O operations
-- Error handling
+### Test Coverage
 
-## 🔄 Development Workflow
+- **Configuration Validation**: Schema validation, environment variables
+- **Circuit Breaker Logic**: Failure detection, recovery patterns
+- **Performance Monitoring**: Metrics collection, system monitoring
+- **Health Checks**: Component validation, threshold testing
+- **CLI Interface**: User interaction, progress tracking
 
-1. **Make changes** to source files in `src/`
-2. **Test changes**: `python main.py test`
-3. **Generate samples**: `python main.py fanvue` or `python main.py loyalfans`
-4. **Review output** in `output/` directory
-5. **Iterate** based on results
+## 📋 Enterprise Requirements
 
-## 📋 Requirements
+### System Requirements
+- **Python**: 3.8+ with enterprise libraries
+- **Memory**: 4GB+ RAM (8GB+ recommended for GPU)
+- **Storage**: 10GB+ free space for models and content
+- **Network**: Internet access for AI model downloads
 
-See `requirements.txt` for complete dependency list. Key requirements:
-
+### Dependencies
+See `requirements.txt` for complete dependency list:
 - `torch>=2.0.0` - PyTorch for AI models
 - `diffusers>=0.21.0` - Hugging Face Diffusers
 - `transformers>=4.21.0` - Transformer models
+- `psutil` - System monitoring
 - `pillow>=9.0.0` - Image processing
-- `schedule` - Task scheduling
-- `python-dotenv` - Environment management
 
-## 🎯 Platform Guidelines
+## 🔮 Enterprise Roadmap
 
-### Fanvue Content Guidelines
-- Focus on authenticity and relatability  
-- Use natural, lifestyle-oriented imagery
-- Encourage engagement with questions
-- Maintain friendly, approachable tone
-- Emphasize real moments and genuine expressions
-
-### LoyalFans Content Guidelines
-- Emphasize premium, exclusive content
-- Use sophisticated, artistic imagery
-- Highlight luxury and refinement
-- Maintain elegant, upscale tone
-- Focus on unique, high-quality experiences
-
-## 🔮 Future Enhancements
-
-- **Multi-language Support**: Content generation in multiple languages
-- **Advanced Analytics**: Performance tracking and optimization
-- **Batch Processing**: Generate multiple content sets
-- **Custom Templates**: User-defined caption templates
+### Planned Enhancements
+- **ML-based Scheduling**: Optimal posting time prediction
+- **Advanced Analytics**: Content engagement prediction
+- **Web Dashboard**: Real-time monitoring interface
 - **API Integration**: Direct platform publishing
-- **Content Scheduling**: Automated posting workflows
+- **Multi-language Support**: International content generation
+- **Advanced Content Quality**: AI-based quality assessment
+
+### Current Limitations
+- **GPU Monitoring**: Requires `pynvml` for advanced GPU metrics
+- **Model Caching**: Internet required for initial model downloads
+- **Platform APIs**: Direct publishing requires platform API integration
 
 ## 🤝 Contributing
 
+### Development Workflow
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Run tests: `python main.py test`
-5. Submit a pull request
+3. Implement changes with tests
+4. Run the enterprise test suite: `python main.py run-tests`
+5. Validate with health checks: `python main.py health`
+6. Submit a pull request
+
+### Code Standards
+- **Type Hints**: Use type annotations for all functions
+- **Documentation**: Comprehensive docstrings for all modules
+- **Testing**: Unit tests for all new features
+- **Monitoring**: Add metrics for new operations
 
 ## 📄 License
 
-This project is part of the FionaSparx AI Content Creator system.
+This project is part of the FionaSparx AI Content Creator Enterprise system.
 
-## 🆘 Support
+## 🆘 Enterprise Support
 
-For issues or questions:
-1. Check the error logs in the console output
-2. Verify all dependencies are installed correctly
-3. Test with `python main.py test` to diagnose issues
-4. Review the output in `output/` directory for results
+### Troubleshooting
+
+1. **Health Check Issues**: Run `python main.py health` for diagnostics
+2. **Performance Problems**: Check `python main.py performance` for metrics
+3. **Configuration Errors**: Validate with `python main.py config`
+4. **Component Failures**: Test with `python main.py test`
+
+### Monitoring
+
+- **Health Reports**: Check `logs/health_report.json` for system status
+- **Performance Data**: Review `logs/performance_metrics.json` for analytics
+- **Content Logs**: Monitor `output/` directory for generation tracking
+
+### Support Channels
+
+For enterprise support:
+1. Check the comprehensive health status
+2. Review performance metrics and logs
+3. Validate configuration and environment
+4. Run the full test suite for component validation
 
 ---
 
-**Made with ❤️ for content creators on Fanvue and LoyalFans**
+**Enterprise-Grade AI Content Generation**
+*Built for scale, reliability, and performance*

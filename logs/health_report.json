@@ -1,0 +1,140 @@
+{
+  "status": "warning",
+  "message": "1 issues detected",
+  "timestamp": "2025-07-22T18:35:36.100346",
+  "summary": {
+    "total_checks": 4,
+    "status_counts": {
+      "healthy": 3,
+      "warning": 1,
+      "critical": 0,
+      "unknown": 0
+    }
+  },
+  "checks": {
+    "system_resources": {
+      "name": "system_resources",
+      "status": "healthy",
+      "message": "System resources are healthy",
+      "details": {
+        "cpu_percent": 0.0,
+        "memory_percent": 11.6,
+        "memory_available_gb": 13.807998657226562,
+        "disk_percent": 73.2,
+        "disk_free_gb": 19.158950805664062,
+        "thresholds": {
+          "cpu_warning": 80.0,
+          "cpu_critical": 95.0,
+          "memory_warning": 85.0,
+          "memory_critical": 95.0,
+          "disk_warning": 85.0,
+          "disk_critical": 95.0
+        }
+      },
+      "timestamp": "2025-07-22T18:35:36.099490",
+      "execution_time_ms": 1000.81467628479
+    },
+    "directories": {
+      "name": "directories",
+      "status": "healthy",
+      "message": "All directories are accessible",
+      "details": {
+        "directories": {
+          "logs": {
+            "exists": true,
+            "readable": true,
+            "writable": true
+          },
+          "data": {
+            "exists": true,
+            "readable": true,
+            "writable": true
+          },
+          "output": {
+            "exists": true,
+            "readable": true,
+            "writable": true
+          },
+          "config": {
+            "exists": true,
+            "readable": true,
+            "writable": true
+          }
+        },
+        "total_checked": 4,
+        "issues_found": 0
+      },
+      "timestamp": "2025-07-22T18:35:36.099953",
+      "execution_time_ms": 0.45108795166015625
+    },
+    "configuration": {
+      "name": "configuration",
+      "status": "healthy",
+      "message": "Configuration is valid",
+      "details": {
+        "configuration_status": {
+          "ai_model": {
+            "present": true,
+            "required_fields": {
+              "image_model": {
+                "present": true,
+                "value": "runwayml/stable-diffusion-v1-5"
+              },
+              "device": {
+                "present": true,
+                "value": "auto"
+              }
+            }
+          },
+          "platforms": {
+            "fanvue": {
+              "valid": true,
+              "enabled": true
+            },
+            "loyalfans": {
+              "valid": true,
+              "enabled": true
+            },
+            "instagram": {
+              "valid": true,
+              "enabled": true
+            }
+          }
+        },
+        "total_issues": 0,
+        "config_sections": [
+          "ai_model",
+          "platforms",
+          "monitoring",
+          "security",
+          "error_handling"
+        ]
+      },
+      "timestamp": "2025-07-22T18:35:36.099979",
+      "execution_time_ms": 0.014781951904296875
+    },
+    "ai_models": {
+      "name": "ai_models",
+      "status": "warning",
+      "message": "Image generator not available",
+      "details": {
+        "models": {
+          "text_generator": {
+            "available": true,
+            "functional": true,
+            "test_output_length": 200
+          },
+          "image_generator": {
+            "available": false,
+            "model_loaded": false,
+            "error": "Not initialized"
+          }
+        },
+        "total_models": 2,
+        "functional_models": 1
+      },
+      "timestamp": "2025-07-22T18:35:36.100090",
+      "execution_time_ms": 0.10347366333007812
+    }
+  }
+}

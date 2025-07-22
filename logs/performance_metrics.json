@@ -1,0 +1,53 @@
+{
+  "timestamp": "2025-07-22T18:36:17.023380",
+  "system_metrics": [
+    {
+      "timestamp": "2025-07-22T18:36:17.018800",
+      "metrics": {
+        "cpu_percent": 0.2,
+        "memory_percent": 11.7,
+        "memory_available_gb": 13.792652130126953,
+        "disk_usage_percent": 73.2,
+        "disk_free_gb": 19.158893585205078,
+        "gpu_memory_used_mb": null,
+        "gpu_memory_total_mb": null,
+        "gpu_utilization_percent": null
+      }
+    }
+  ],
+  "ai_metrics": [],
+  "performance_metrics": [
+    {
+      "name": "system.cpu.usage",
+      "value": 0.2,
+      "unit": "percent",
+      "timestamp": "2025-07-22T18:36:17.018814",
+      "tags": {
+        "component": "system"
+      }
+    },
+    {
+      "name": "system.memory.usage",
+      "value": 11.7,
+      "unit": "percent",
+      "timestamp": "2025-07-22T18:36:17.018822",
+      "tags": {
+        "component": "system"
+      }
+    }
+  ],
+  "summary": {
+    "timestamp": "2025-07-22T18:36:18.023782",
+    "system_health": {
+      "cpu_usage": 0.2,
+      "memory_usage": 11.7,
+      "disk_usage": 73.2,
+      "gpu_memory_usage": null
+    },
+    "ai_operations": {
+      "total_operations": 0
+    },
+    "monitoring_enabled": true,
+    "metrics_collected": 2
+  }
+}

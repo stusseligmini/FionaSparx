@@ -2,19 +2,25 @@
   {
     "platform": "fanvue",
     "image_path": "output/fanvue_content_1.png",
-    "caption": "Style is about feeling good in what you wear 🌟 #fanvue #fashion #style #confident #beautiful #elegant #chic #trendy #contentcreator #authentic #realme",
-    "prompt": "A confident young woman in casual lifestyle setting, natural lighting, authentic smile"
+    "caption": "Confidence is the best accessory you can wear 💎 #fanvue #fashion #style #confident #beautiful #elegant #chic #trendy #contentcreator #authentic #realme",
+    "prompt": "A confident young woman in casual lifestyle setting, natural lighting, authentic smile",
+    "generation_time_ms": 13.588428497314453,
+    "timestamp": 1753209422.7007968
   },
   {
     "platform": "fanvue",
     "image_path": "output/fanvue_content_2.png",
-    "caption": "Every outfit tells a story - what's yours? 👗 #fanvue #fashion #style #confident #beautiful #elegant #chic #trendy #contentcreator #authentic #realme",
-    "prompt": "Stylish fashion photography, modern outfit, urban background, professional quality"
+    "caption": "Style is about feeling good in what you wear 🌟 #fanvue #fashion #style #confident #beautiful #elegant #chic #trendy #contentcreator #authentic #realme",
+    "prompt": "Stylish fashion photography, modern outfit, urban background, professional quality",
+    "generation_time_ms": 7.938623428344727,
+    "timestamp": 1753209422.9090502
   },
   {
     "platform": "fanvue",
     "image_path": "output/fanvue_content_3.png",
-    "caption": "Feeling confident in my own skin and style today 💫 #fanvue #fashion #style #confident #beautiful #elegant #chic #trendy #contentcreator #authentic #realme",
-    "prompt": "Lifestyle moment, cozy home setting, natural authentic expression, soft lighting"
+    "caption": "Confidence is the best accessory you can wear 💎 #fanvue #fashion #style #confident #beautiful #elegant #chic #trendy #contentcreator #authentic #realme",
+    "prompt": "Lifestyle moment, cozy home setting, natural authentic expression, soft lighting",
+    "generation_time_ms": 7.848024368286133,
+    "timestamp": 1753209423.1172295
   }
 ]

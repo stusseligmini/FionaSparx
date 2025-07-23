@@ -1,0 +1,279 @@
+{
+  "name": "FionaSparx Advanced Content Generation",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "id": "2",
+      "name": "Content Request Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 400],
+      "parameters": {
+        "path": "generate-content",
+        "httpMethod": "POST",
+        "responseMode": "responseNode"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Parse Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 350],
+      "parameters": {
+        "functionCode": "// Parse and validate content generation request\nconst input = $input.first().json;\n\n// Default parameters\nconst defaults = {\n  platform: 'fanvue',\n  content_type: 'lifestyle',\n  count: 3,\n  style: 'authentic',\n  mood: 'positive',\n  include_image: true,\n  quality_threshold: 3.5\n};\n\n// Merge with request parameters\nconst params = {\n  ...defaults,\n  ...input.body,\n  ...input.query,\n  timestamp: new Date().toISOString(),\n  request_id: `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`\n};\n\n// Validate platform\nconst validPlatforms = ['fanvue', 'loyalfans', 'instagram', 'twitter', 'tiktok'];\nif (!validPlatforms.includes(params.platform)) {\n  return {\n    json: {\n      error: 'Invalid platform',\n      valid_platforms: validPlatforms,\n      provided: params.platform\n    }\n  };\n}\n\n// Validate content type\nconst validTypes = ['lifestyle', 'fashion', 'fitness', 'motivation', 'behind_scenes', 'personal', 'teaser'];\nif (!validTypes.includes(params.content_type)) {\n  params.content_type = 'lifestyle'; // Default fallback\n}\n\n// Validate count\nparams.count = Math.min(Math.max(parseInt(params.count) || 3, 1), 10);\n\nreturn { json: params };"
+      }
+    },
+    {
+      "id": "4",
+      "name": "AI Content Strategy",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 350],
+      "parameters": {
+        "functionCode": "// Intelligent content strategy based on learning data\nconst axios = require('axios');\nconst params = $input.first().json;\n\nif (params.error) {\n  return { json: params };\n}\n\ntry {\n  // Get AI insights for optimal content strategy\n  const strategyResponse = await axios.post('http://localhost:5000/api/ai/content-strategy', {\n    platform: params.platform,\n    content_type: params.content_type,\n    current_time: new Date().getHours(),\n    day_of_week: new Date().getDay(),\n    recent_performance: true\n  });\n  \n  const strategy = strategyResponse.data;\n  \n  // Generate content prompts based on strategy\n  const contentPrompts = [];\n  \n  for (let i = 0; i < params.count; i++) {\n    const prompt = {\n      id: `${params.request_id}_${i + 1}`,\n      platform: params.platform,\n      type: params.content_type,\n      style: strategy.recommended_style || params.style,\n      mood: strategy.recommended_mood || params.mood,\n      themes: strategy.trending_themes || ['lifestyle', 'authentic'],\n      hashtags: strategy.optimal_hashtags || [],\n      image_style: strategy.image_style || 'lifestyle',\n      caption_length: strategy.optimal_caption_length || 'medium',\n      call_to_action: strategy.recommended_cta || 'engagement',\n      personalization: strategy.personalization_elements || {}\n    };\n    \n    // Add time-specific elements\n    const currentHour = new Date().getHours();\n    if (currentHour >= 6 && currentHour <= 9) {\n      prompt.time_context = 'morning';\n      prompt.themes.push('motivation', 'new_day');\n    } else if (currentHour >= 12 && currentHour <= 14) {\n      prompt.time_context = 'afternoon';\n      prompt.themes.push('lifestyle', 'current_activity');\n    } else if (currentHour >= 17 && currentHour <= 20) {\n      prompt.time_context = 'evening';\n      prompt.themes.push('reflection', 'relaxation');\n    } else {\n      prompt.time_context = 'late';\n      prompt.themes.push('intimate', 'personal');\n    }\n    \n    contentPrompts.push(prompt);\n  }\n  \n  return {\n    json: {\n      strategy: strategy,\n      prompts: contentPrompts,\n      original_params: params,\n      generation_plan: {\n        total_content: params.count,\n        estimated_time: params.count * 30, // seconds\n        quality_checks: true,\n        cross_platform_optimization: strategy.cross_platform || false\n      }\n    }\n  };\n  \n} catch (error) {\n  console.error('Strategy generation failed:', error);\n  \n  // Fallback strategy\n  const fallbackPrompts = [];\n  for (let i = 0; i < params.count; i++) {\n    fallbackPrompts.push({\n      id: `${params.request_id}_${i + 1}`,\n      platform: params.platform,\n      type: params.content_type,\n      style: params.style,\n      mood: params.mood,\n      themes: ['lifestyle'],\n      fallback: true\n    });\n  }\n  \n  return {\n    json: {\n      strategy: { fallback: true },\n      prompts: fallbackPrompts,\n      original_params: params,\n      warning: 'Using fallback strategy due to AI strategy failure'\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "5",
+      "name": "Generate Images",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 250],
+      "parameters": {
+        "functionCode": "// Generate AI images for content\nconst axios = require('axios');\nconst data = $input.first().json;\n\nif (data.error) {\n  return { json: data };\n}\n\nconst imageGeneration = {\n  request_id: data.original_params.request_id,\n  images: [],\n  generation_time: 0,\n  total_prompts: data.prompts.length\n};\n\nconst startTime = Date.now();\n\ntry {\n  // Generate images for each prompt\n  for (const prompt of data.prompts) {\n    if (!data.original_params.include_image) {\n      // Skip image generation if not requested\n      imageGeneration.images.push({\n        id: prompt.id,\n        image_path: null,\n        placeholder: true,\n        message: 'Image generation skipped by request'\n      });\n      continue;\n    }\n    \n    const imagePrompt = {\n      style: prompt.image_style,\n      mood: prompt.mood,\n      themes: prompt.themes,\n      platform: prompt.platform,\n      quality: 'high',\n      size: data.original_params.platform === 'instagram' ? [1080, 1080] : [768, 768]\n    };\n    \n    try {\n      const imageResponse = await axios.post('http://localhost:5000/api/ai/generate-image', {\n        prompt: imagePrompt,\n        id: prompt.id\n      });\n      \n      imageGeneration.images.push({\n        id: prompt.id,\n        image_path: imageResponse.data.image_path,\n        image_url: imageResponse.data.image_url,\n        generation_time: imageResponse.data.generation_time,\n        style_applied: imageResponse.data.style,\n        success: true\n      });\n      \n    } catch (imageError) {\n      console.error(`Image generation failed for ${prompt.id}:`, imageError);\n      \n      // Generate placeholder\n      imageGeneration.images.push({\n        id: prompt.id,\n        image_path: `output/placeholder_${prompt.id}.png`,\n        placeholder: true,\n        error: imageError.message,\n        success: false\n      });\n    }\n  }\n  \n  imageGeneration.generation_time = Date.now() - startTime;\n  imageGeneration.success = true;\n  \n  return {\n    json: {\n      ...data,\n      images: imageGeneration\n    }\n  };\n  \n} catch (error) {\n  console.error('Batch image generation failed:', error);\n  return {\n    json: {\n      ...data,\n      images: {\n        ...imageGeneration,\n        error: error.message,\n        success: false\n      }\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "6",
+      "name": "Generate Captions",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 450],
+      "parameters": {
+        "functionCode": "// Generate AI-powered captions\nconst axios = require('axios');\nconst data = $input.first().json;\n\nif (data.error) {\n  return { json: data };\n}\n\nconst captionGeneration = {\n  request_id: data.original_params.request_id,\n  captions: [],\n  generation_time: 0,\n  total_prompts: data.prompts.length\n};\n\nconst startTime = Date.now();\n\ntry {\n  // Generate captions for each prompt\n  for (const prompt of data.prompts) {\n    const captionParams = {\n      platform: prompt.platform,\n      content_type: prompt.type,\n      style: prompt.style,\n      mood: prompt.mood,\n      themes: prompt.themes,\n      time_context: prompt.time_context,\n      hashtags: prompt.hashtags,\n      call_to_action: prompt.call_to_action,\n      length: prompt.caption_length,\n      personalization: prompt.personalization\n    };\n    \n    try {\n      const captionResponse = await axios.post('http://localhost:5000/api/ai/generate-caption', {\n        params: captionParams,\n        id: prompt.id\n      });\n      \n      captionGeneration.captions.push({\n        id: prompt.id,\n        caption: captionResponse.data.caption,\n        hashtags: captionResponse.data.hashtags,\n        word_count: captionResponse.data.word_count,\n        estimated_engagement: captionResponse.data.estimated_engagement,\n        quality_score: captionResponse.data.quality_score,\n        platform_optimized: captionResponse.data.platform_optimized,\n        success: true\n      });\n      \n    } catch (captionError) {\n      console.error(`Caption generation failed for ${prompt.id}:`, captionError);\n      \n      // Generate fallback caption\n      const fallbackCaption = generateFallbackCaption(prompt);\n      \n      captionGeneration.captions.push({\n        id: prompt.id,\n        caption: fallbackCaption.caption,\n        hashtags: fallbackCaption.hashtags,\n        word_count: fallbackCaption.caption.split(' ').length,\n        quality_score: 3.0,\n        fallback: true,\n        error: captionError.message,\n        success: false\n      });\n    }\n  }\n  \n  captionGeneration.generation_time = Date.now() - startTime;\n  captionGeneration.success = true;\n  \n  return {\n    json: {\n      ...data,\n      captions: captionGeneration\n    }\n  };\n  \n} catch (error) {\n  console.error('Batch caption generation failed:', error);\n  return {\n    json: {\n      ...data,\n      captions: {\n        ...captionGeneration,\n        error: error.message,\n        success: false\n      }\n    }\n  };\n}\n\n// Fallback caption generator\nfunction generateFallbackCaption(prompt) {\n  const templates = {\n    lifestyle: {\n      fanvue: \"Living my best life and sharing authentic moments with you 💫 What's making you smile today?\",\n      loyalfans: \"Exclusive glimpse into my world ✨ Premium content for my favorite people.\"\n    },\n    fashion: {\n      fanvue: \"Today's vibe: confident and stylish 👗 Fashion is about feeling good in your own skin.\",\n      loyalfans: \"Curated style just for you 💎 Elegance meets authenticity.\"\n    },\n    fitness: {\n      fanvue: \"Strength comes from within 💪 Sharing my fitness journey with amazing people like you.\",\n      loyalfans: \"Exclusive workout content and wellness tips 🏃‍♀️ VIP access to my fitness routine.\"\n    }\n  };\n  \n  const template = templates[prompt.type]?.[prompt.platform] || \n    \"Sharing a special moment with you ✨ Thank you for being part of this journey.\";\n  \n  const hashtags = {\n    fanvue: \"#fanvue #authentic #lifestyle #realme #genuine\",\n    loyalfans: \"#loyalfans #exclusive #premium #vip #content\"\n  }[prompt.platform] || \"#content #lifestyle #authentic\";\n  \n  return {\n    caption: `${template}\\n\\n${hashtags}`,\n    hashtags: hashtags.split(' ')\n  };\n}"
+      }
+    },
+    {
+      "id": "7",
+      "name": "Quality Assessment",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1050, 350],
+      "parameters": {
+        "functionCode": "// Comprehensive quality assessment\nconst axios = require('axios');\nconst data = $input.first().json;\n\nif (data.error) {\n  return { json: data };\n}\n\nconst qualityAssessment = {\n  request_id: data.original_params.request_id,\n  assessments: [],\n  overall_quality: 0,\n  passed_threshold: 0,\n  failed_threshold: 0\n};\n\nconst qualityThreshold = data.original_params.quality_threshold || 3.5;\n\ntry {\n  // Assess each piece of content\n  for (let i = 0; i < data.prompts.length; i++) {\n    const prompt = data.prompts[i];\n    const image = data.images?.images?.[i];\n    const caption = data.captions?.captions?.[i];\n    \n    if (!caption) {\n      console.error(`No caption found for prompt ${prompt.id}`);\n      continue;\n    }\n    \n    try {\n      const assessmentResponse = await axios.post('http://localhost:5000/api/ai/assess-quality', {\n        content: {\n          caption: caption.caption,\n          hashtags: caption.hashtags,\n          image_available: image?.success || false,\n          platform: prompt.platform,\n          content_type: prompt.type\n        },\n        id: prompt.id\n      });\n      \n      const assessment = {\n        id: prompt.id,\n        overall_score: assessmentResponse.data.overall_score,\n        readability: assessmentResponse.data.readability,\n        engagement_potential: assessmentResponse.data.engagement_potential,\n        platform_fit: assessmentResponse.data.platform_fit,\n        quality_level: assessmentResponse.data.quality_level,\n        strengths: assessmentResponse.data.strengths,\n        improvements: assessmentResponse.data.improvements,\n        recommendations: assessmentResponse.data.recommendations,\n        passed_threshold: assessmentResponse.data.overall_score >= qualityThreshold,\n        success: true\n      };\n      \n      qualityAssessment.assessments.push(assessment);\n      \n      if (assessment.passed_threshold) {\n        qualityAssessment.passed_threshold++;\n      } else {\n        qualityAssessment.failed_threshold++;\n      }\n      \n    } catch (assessmentError) {\n      console.error(`Quality assessment failed for ${prompt.id}:`, assessmentError);\n      \n      // Fallback assessment\n      const fallbackAssessment = {\n        id: prompt.id,\n        overall_score: caption.quality_score || 3.0,\n        quality_level: 'SATISFACTORY',\n        passed_threshold: (caption.quality_score || 3.0) >= qualityThreshold,\n        fallback: true,\n        error: assessmentError.message,\n        success: false\n      };\n      \n      qualityAssessment.assessments.push(fallbackAssessment);\n      \n      if (fallbackAssessment.passed_threshold) {\n        qualityAssessment.passed_threshold++;\n      } else {\n        qualityAssessment.failed_threshold++;\n      }\n    }\n  }\n  \n  // Calculate overall quality\n  if (qualityAssessment.assessments.length > 0) {\n    const totalScore = qualityAssessment.assessments.reduce((sum, assessment) => \n      sum + (assessment.overall_score || 3.0), 0);\n    qualityAssessment.overall_quality = totalScore / qualityAssessment.assessments.length;\n  }\n  \n  qualityAssessment.success = true;\n  qualityAssessment.batch_passed = qualityAssessment.passed_threshold >= Math.ceil(data.prompts.length * 0.7); // 70% pass rate\n  \n  return {\n    json: {\n      ...data,\n      quality: qualityAssessment\n    }\n  };\n  \n} catch (error) {\n  console.error('Quality assessment batch failed:', error);\n  return {\n    json: {\n      ...data,\n      quality: {\n        ...qualityAssessment,\n        error: error.message,\n        success: false\n      }\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "8",
+      "name": "Compile Final Content",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1250, 350],
+      "parameters": {
+        "functionCode": "// Compile final content packages\nconst data = $input.first().json;\n\nif (data.error) {\n  return { json: data };\n}\n\nconst finalContent = {\n  request_id: data.original_params.request_id,\n  platform: data.original_params.platform,\n  content_type: data.original_params.content_type,\n  generated_at: new Date().toISOString(),\n  total_generated: data.prompts.length,\n  quality_passed: data.quality?.passed_threshold || 0,\n  overall_quality: data.quality?.overall_quality || 0,\n  content_items: []\n};\n\n// Compile each content item\nfor (let i = 0; i < data.prompts.length; i++) {\n  const prompt = data.prompts[i];\n  const image = data.images?.images?.[i];\n  const caption = data.captions?.captions?.[i];\n  const quality = data.quality?.assessments?.[i];\n  \n  const contentItem = {\n    id: prompt.id,\n    platform: prompt.platform,\n    content_type: prompt.type,\n    \n    // Content\n    caption: caption?.caption || 'Caption generation failed',\n    hashtags: caption?.hashtags || [],\n    word_count: caption?.word_count || 0,\n    \n    // Image\n    image_path: image?.image_path || null,\n    image_url: image?.image_url || null,\n    image_generated: image?.success || false,\n    \n    // Quality metrics\n    quality_score: quality?.overall_score || caption?.quality_score || 3.0,\n    quality_level: quality?.quality_level || 'SATISFACTORY',\n    passed_threshold: quality?.passed_threshold || false,\n    \n    // Metadata\n    style: prompt.style,\n    mood: prompt.mood,\n    themes: prompt.themes,\n    time_context: prompt.time_context,\n    estimated_engagement: caption?.estimated_engagement || 'medium',\n    \n    // Quality details\n    strengths: quality?.strengths || [],\n    improvements: quality?.improvements || [],\n    recommendations: quality?.recommendations || [],\n    \n    // Generation status\n    caption_success: caption?.success || false,\n    image_success: image?.success || false,\n    quality_success: quality?.success || false,\n    \n    // Errors (if any)\n    errors: {\n      caption: caption?.success === false ? caption?.error : null,\n      image: image?.success === false ? image?.error : null,\n      quality: quality?.success === false ? quality?.error : null\n    }\n  };\n  \n  finalContent.content_items.push(contentItem);\n}\n\n// Add summary statistics\nfinalContent.statistics = {\n  generation_time: {\n    images: data.images?.generation_time || 0,\n    captions: data.captions?.generation_time || 0,\n    total: (data.images?.generation_time || 0) + (data.captions?.generation_time || 0)\n  },\n  success_rates: {\n    images: data.images?.images ? data.images.images.filter(img => img.success).length / data.images.images.length : 0,\n    captions: data.captions?.captions ? data.captions.captions.filter(cap => cap.success).length / data.captions.captions.length : 0,\n    quality: data.quality?.assessments ? data.quality.assessments.filter(qual => qual.success).length / data.quality.assessments.length : 0\n  },\n  average_quality: finalContent.overall_quality,\n  content_ready_to_post: finalContent.content_items.filter(item => item.passed_threshold).length\n};\n\n// Add recommendations for failed content\nfinalContent.batch_recommendations = [];\nif (finalContent.quality_passed < finalContent.total_generated * 0.8) {\n  finalContent.batch_recommendations.push('Consider regenerating content with adjusted parameters for better quality');\n}\nif (finalContent.statistics.success_rates.images < 0.8) {\n  finalContent.batch_recommendations.push('Image generation had issues - check AI model status');\n}\nif (finalContent.statistics.success_rates.captions < 0.8) {\n  finalContent.batch_recommendations.push('Caption generation had issues - verify text generation service');\n}\n\nreturn { json: finalContent };"
+      }
+    },
+    {
+      "id": "9",
+      "name": "Response Handler",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1450, 350],
+      "parameters": {
+        "functionCode": "// Format response for webhook\nconst content = $input.first().json;\n\n// Create response payload\nconst response = {\n  success: true,\n  request_id: content.request_id,\n  generated_at: content.generated_at,\n  platform: content.platform,\n  content_type: content.content_type,\n  \n  summary: {\n    total_generated: content.total_generated,\n    quality_passed: content.quality_passed,\n    average_quality: parseFloat(content.overall_quality.toFixed(2)),\n    ready_to_post: content.content_ready_to_post\n  },\n  \n  content: content.content_items.map(item => ({\n    id: item.id,\n    caption: item.caption,\n    hashtags: item.hashtags,\n    image_path: item.image_path,\n    quality_score: parseFloat(item.quality_score.toFixed(2)),\n    quality_level: item.quality_level,\n    passed_threshold: item.passed_threshold,\n    estimated_engagement: item.estimated_engagement,\n    recommendations: item.recommendations.slice(0, 3) // Limit to top 3\n  })),\n  \n  statistics: content.statistics,\n  recommendations: content.batch_recommendations,\n  \n  meta: {\n    generation_time_ms: content.statistics.generation_time.total,\n    ai_strategy_used: !content.strategy?.fallback,\n    webhook_response: true\n  }\n};\n\n// Add errors if any critical failures\nconst criticalErrors = content.content_items.filter(item => \n  !item.caption_success && !item.image_success\n);\n\nif (criticalErrors.length > 0) {\n  response.warnings = [`${criticalErrors.length} content items had critical generation failures`];\n}\n\nreturn { json: response };"
+      }
+    },
+    {
+      "id": "10",
+      "name": "Store Content",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1250, 200],
+      "parameters": {
+        "operation": "insert",
+        "table": "generated_content",
+        "columns": [
+          "request_id",
+          "platform",
+          "content_type",
+          "generated_at",
+          "total_generated",
+          "quality_passed",
+          "overall_quality",
+          "content_data",
+          "statistics"
+        ],
+        "values": [
+          "={{$json.request_id}}",
+          "={{$json.platform}}",
+          "={{$json.content_type}}",
+          "={{$json.generated_at}}",
+          "={{$json.total_generated}}",
+          "={{$json.quality_passed}}",
+          "={{$json.overall_quality}}",
+          "={{JSON.stringify($json.content_items)}}",
+          "={{JSON.stringify($json.statistics)}}"
+        ]
+      }
+    },
+    {
+      "id": "11",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1650, 350],
+      "parameters": {
+        "responseBody": "={{JSON.stringify($json, null, 2)}}",
+        "options": {
+          "responseHeaders": {
+            "Content-Type": "application/json"
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Request Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Request": {
+      "main": [
+        [
+          {
+            "node": "AI Content Strategy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Content Strategy": {
+      "main": [
+        [
+          {
+            "node": "Generate Images",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Captions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Images": {
+      "main": [
+        [
+          {
+            "node": "Quality Assessment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Captions": {
+      "main": [
+        [
+          {
+            "node": "Quality Assessment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Assessment": {
+      "main": [
+        [
+          {
+            "node": "Compile Final Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Final Content": {
+      "main": [
+        [
+          {
+            "node": "Store Content",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Response Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Response Handler": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "timezone": "Europe/Oslo",
+    "saveManualExecutions": true
+  },
+  "staticData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [
+    {
+      "id": "1",
+      "name": "FionaSparx",
+      "color": "#FF6B6B"
+    },
+    {
+      "id": "2",
+      "name": "Content Generation",
+      "color": "#4ECDC4"
+    },
+    {
+      "id": "5",
+      "name": "API",
+      "color": "#F7B731"
+    }
+  ]
+}

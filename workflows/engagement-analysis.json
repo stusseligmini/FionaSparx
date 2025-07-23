@@ -1,0 +1,221 @@
+{
+  "name": "FionaSparx Engagement Analysis & Learning",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Hourly Analysis Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "minute": [30],
+          "timezone": "Europe/Oslo"
+        }
+      }
+    },
+    {
+      "id": "2",
+      "name": "Fetch Platform Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "parameters": {
+        "functionCode": "// Fetch engagement data from all platforms\nconst axios = require('axios');\nconst promises = [];\n\n// Fanvue API\nif (process.env.FANVUE_API_KEY) {\n  promises.push(\n    axios.get('https://api.fanvue.com/v1/analytics/recent', {\n      headers: { 'Authorization': `Bearer ${process.env.FANVUE_API_KEY}` },\n      params: { hours: 1 }\n    }).then(response => ({\n      platform: 'fanvue',\n      data: response.data\n    }))\n  );\n}\n\n// LoyalFans API\nif (process.env.LOYALFANS_API_KEY) {\n  promises.push(\n    axios.get('https://api.loyalfans.com/v1/analytics/recent', {\n      headers: { 'Authorization': `Bearer ${process.env.LOYALFANS_API_KEY}` },\n      params: { hours: 1 }\n    }).then(response => ({\n      platform: 'loyalfans',\n      data: response.data\n    }))\n  );\n}\n\n// Instagram Business API\nif (process.env.INSTAGRAM_ACCESS_TOKEN) {\n  promises.push(\n    axios.get(`https://graph.facebook.com/v18.0/me/media`, {\n      params: {\n        fields: 'id,caption,media_type,timestamp,like_count,comments_count,insights.metric(impressions,reach,engagement)',\n        access_token: process.env.INSTAGRAM_ACCESS_TOKEN,\n        since: new Date(Date.now() - 3600000).toISOString() // Last hour\n      }\n    }).then(response => ({\n      platform: 'instagram',\n      data: response.data\n    }))\n  );\n}\n\n// Twitter API v2\nif (process.env.TWITTER_BEARER_TOKEN) {\n  promises.push(\n    axios.get('https://api.twitter.com/2/users/me/tweets', {\n      headers: { 'Authorization': `Bearer ${process.env.TWITTER_BEARER_TOKEN}` },\n      params: {\n        'tweet.fields': 'created_at,public_metrics,context_annotations',\n        'start_time': new Date(Date.now() - 3600000).toISOString(),\n        'max_results': 100\n      }\n    }).then(response => ({\n      platform: 'twitter',\n      data: response.data\n    }))\n  );\n}\n\ntry {\n  const results = await Promise.allSettled(promises);\n  const platformData = results\n    .filter(result => result.status === 'fulfilled')\n    .map(result => result.value);\n\n  return {\n    json: {\n      timestamp: new Date().toISOString(),\n      platforms: platformData,\n      totalPlatforms: platformData.length\n    }\n  };\n} catch (error) {\n  console.error('Platform data fetch failed:', error);\n  return {\n    json: {\n      error: 'Platform data fetch failed',\n      message: error.message,\n      timestamp: new Date().toISOString()\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Analyze Engagement Patterns",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "parameters": {
+        "functionCode": "// AI-powered engagement pattern analysis\nconst data = $input.first().json;\n\nif (data.error) {\n  return { json: data };\n}\n\nconst analysis = {\n  timestamp: data.timestamp,\n  insights: {},\n  trends: {},\n  recommendations: []\n};\n\n// Analyze each platform\ndata.platforms.forEach(platform => {\n  const platformName = platform.platform;\n  const metrics = platform.data;\n  \n  // Calculate engagement metrics\n  let totalEngagement = 0;\n  let totalReach = 0;\n  let postCount = 0;\n  \n  if (platformName === 'fanvue' || platformName === 'loyalfans') {\n    // Adult content platform metrics\n    totalEngagement = metrics.likes + metrics.comments + metrics.shares || 0;\n    totalReach = metrics.views || 0;\n    postCount = metrics.posts?.length || 0;\n    \n  } else if (platformName === 'instagram') {\n    // Instagram metrics\n    metrics.data?.forEach(post => {\n      totalEngagement += (post.like_count || 0) + (post.comments_count || 0);\n      if (post.insights?.data) {\n        const reach = post.insights.data.find(i => i.name === 'reach');\n        totalReach += reach?.values?.[0]?.value || 0;\n      }\n      postCount++;\n    });\n    \n  } else if (platformName === 'twitter') {\n    // Twitter metrics\n    metrics.data?.forEach(tweet => {\n      totalEngagement += (tweet.public_metrics?.like_count || 0) + \n                        (tweet.public_metrics?.retweet_count || 0) + \n                        (tweet.public_metrics?.reply_count || 0);\n      totalReach += tweet.public_metrics?.impression_count || 0;\n      postCount++;\n    });\n  }\n  \n  // Calculate engagement rate\n  const engagementRate = totalReach > 0 ? (totalEngagement / totalReach) * 100 : 0;\n  \n  analysis.insights[platformName] = {\n    totalEngagement,\n    totalReach,\n    postCount,\n    engagementRate: parseFloat(engagementRate.toFixed(2)),\n    avgEngagementPerPost: postCount > 0 ? Math.round(totalEngagement / postCount) : 0\n  };\n});\n\n// Identify trends and patterns\nconst bestPerforming = Object.entries(analysis.insights)\n  .sort((a, b) => b[1].engagementRate - a[1].engagementRate)[0];\n\nif (bestPerforming) {\n  analysis.trends.bestPlatform = bestPerforming[0];\n  analysis.trends.bestEngagementRate = bestPerforming[1].engagementRate;\n}\n\n// Generate AI recommendations\nconst currentHour = new Date().getHours();\nconst dayOfWeek = new Date().getDay();\n\n// Time-based recommendations\nif (currentHour >= 8 && currentHour <= 10) {\n  analysis.recommendations.push('Morning posts show good engagement - continue posting motivational content');\n} else if (currentHour >= 17 && currentHour <= 19) {\n  analysis.recommendations.push('Evening posts are prime time - focus on lifestyle and personal content');\n}\n\n// Platform-specific recommendations\nif (analysis.insights.fanvue?.engagementRate > analysis.insights.loyalfans?.engagementRate) {\n  analysis.recommendations.push('Fanvue is outperforming LoyalFans - consider adapting successful Fanvue content style');\n} else if (analysis.insights.loyalfans?.engagementRate > analysis.insights.fanvue?.engagementRate) {\n  analysis.recommendations.push('LoyalFans is outperforming Fanvue - focus more premium content on LoyalFans');\n}\n\n// Cross-platform promotion recommendations\nif (analysis.insights.instagram?.engagementRate > 5) {\n  analysis.recommendations.push('Instagram engagement is strong - increase cross-promotion to drive traffic to premium platforms');\n}\n\nreturn { json: analysis };"
+      }
+    },
+    {
+      "id": "4",
+      "name": "Update Learning Model",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "parameters": {
+        "functionCode": "// Update AI learning model with new insights\nconst axios = require('axios');\nconst analysis = $input.first().json;\n\n// Send learning data to FionaSparx AI model\ntry {\n  const learningData = {\n    timestamp: analysis.timestamp,\n    engagement_patterns: analysis.insights,\n    trends: analysis.trends,\n    recommendations: analysis.recommendations,\n    context: {\n      hour: new Date().getHours(),\n      day_of_week: new Date().getDay(),\n      week_of_year: Math.ceil((new Date() - new Date(new Date().getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000))\n    }\n  };\n  \n  const response = await axios.post('http://localhost:5000/api/learning/update', learningData);\n  \n  return {\n    json: {\n      success: true,\n      learningUpdate: response.data,\n      originalAnalysis: analysis,\n      timestamp: new Date().toISOString()\n    }\n  };\n  \n} catch (error) {\n  console.error('Learning model update failed:', error);\n  return {\n    json: {\n      success: false,\n      error: error.message,\n      originalAnalysis: analysis\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "5",
+      "name": "Store Analytics Data",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "parameters": {
+        "operation": "insert",
+        "table": "engagement_analytics",
+        "columns": [
+          "timestamp",
+          "platform_data",
+          "insights",
+          "trends",
+          "recommendations",
+          "learning_updated"
+        ],
+        "values": [
+          "={{$json.originalAnalysis.timestamp}}",
+          "={{JSON.stringify($json.originalAnalysis.insights)}}",
+          "={{JSON.stringify($json.originalAnalysis.insights)}}",
+          "={{JSON.stringify($json.originalAnalysis.trends)}}",
+          "={{JSON.stringify($json.originalAnalysis.recommendations)}}",
+          "={{$json.success}}"
+        ]
+      }
+    },
+    {
+      "id": "6",
+      "name": "Subscriber Interaction Analysis",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 500],
+      "parameters": {
+        "functionCode": "// Analyze subscriber interactions and preferences\nconst axios = require('axios');\n\n// Fetch recent subscriber interactions\nconst promises = [];\n\n// Get comments and messages from platforms\nif (process.env.FANVUE_API_KEY) {\n  promises.push(\n    axios.get('https://api.fanvue.com/v1/interactions/recent', {\n      headers: { 'Authorization': `Bearer ${process.env.FANVUE_API_KEY}` },\n      params: { hours: 24, types: 'comments,messages,tips' }\n    }).then(response => ({\n      platform: 'fanvue',\n      interactions: response.data\n    }))\n  );\n}\n\nif (process.env.LOYALFANS_API_KEY) {\n  promises.push(\n    axios.get('https://api.loyalfans.com/v1/interactions/recent', {\n      headers: { 'Authorization': `Bearer ${process.env.LOYALFANS_API_KEY}` },\n      params: { hours: 24, types: 'comments,messages,tips' }\n    }).then(response => ({\n      platform: 'loyalfans',\n      interactions: response.data\n    }))\n  );\n}\n\ntry {\n  const results = await Promise.allSettled(promises);\n  const interactionData = results\n    .filter(result => result.status === 'fulfilled')\n    .map(result => result.value);\n\n  // Analyze sentiment and preferences\n  const analysis = {\n    timestamp: new Date().toISOString(),\n    totalInteractions: 0,\n    sentimentAnalysis: {\n      positive: 0,\n      neutral: 0,\n      negative: 0\n    },\n    topicPreferences: {},\n    responsePatterns: {},\n    recommendations: []\n  };\n\n  interactionData.forEach(platform => {\n    platform.interactions.forEach(interaction => {\n      analysis.totalInteractions++;\n      \n      // Simple sentiment analysis (in real implementation, use proper NLP)\n      const text = interaction.content || interaction.message || '';\n      const positiveWords = ['love', 'amazing', 'beautiful', 'gorgeous', 'perfect', '😍', '🔥', '💖'];\n      const negativeWords = ['bad', 'ugly', 'boring', 'terrible', '😡', '👎'];\n      \n      const hasPositive = positiveWords.some(word => text.toLowerCase().includes(word));\n      const hasNegative = negativeWords.some(word => text.toLowerCase().includes(word));\n      \n      if (hasPositive && !hasNegative) {\n        analysis.sentimentAnalysis.positive++;\n      } else if (hasNegative && !hasPositive) {\n        analysis.sentimentAnalysis.negative++;\n      } else {\n        analysis.sentimentAnalysis.neutral++;\n      }\n      \n      // Extract topic preferences\n      const topics = ['fashion', 'lifestyle', 'fitness', 'travel', 'food', 'art'];\n      topics.forEach(topic => {\n        if (text.toLowerCase().includes(topic)) {\n          analysis.topicPreferences[topic] = (analysis.topicPreferences[topic] || 0) + 1;\n        }\n      });\n    });\n  });\n\n  // Generate recommendations based on subscriber preferences\n  const mostPopularTopic = Object.entries(analysis.topicPreferences)\n    .sort((a, b) => b[1] - a[1])[0];\n    \n  if (mostPopularTopic) {\n    analysis.recommendations.push(`Focus more on ${mostPopularTopic[0]} content - it's highly engaging with subscribers`);\n  }\n  \n  const positiveRatio = analysis.totalInteractions > 0 ? \n    (analysis.sentimentAnalysis.positive / analysis.totalInteractions) * 100 : 0;\n    \n  if (positiveRatio > 70) {\n    analysis.recommendations.push('Subscriber sentiment is very positive - maintain current content strategy');\n  } else if (positiveRatio < 40) {\n    analysis.recommendations.push('Consider adjusting content style to improve subscriber sentiment');\n  }\n\n  return { json: analysis };\n  \n} catch (error) {\n  console.error('Subscriber analysis failed:', error);\n  return {\n    json: {\n      error: 'Subscriber analysis failed',\n      message: error.message,\n      timestamp: new Date().toISOString()\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "7",
+      "name": "AI Response Generation",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 500],
+      "parameters": {
+        "functionCode": "// Generate AI-powered responses for subscriber interactions\nconst axios = require('axios');\nconst subscriberAnalysis = $input.first().json;\n\nif (subscriberAnalysis.error) {\n  return { json: subscriberAnalysis };\n}\n\n// Generate personalized responses based on interaction patterns\ntry {\n  const responsePrompts = [];\n  \n  // Create response templates based on sentiment and preferences\n  if (subscriberAnalysis.sentimentAnalysis.positive > subscriberAnalysis.sentimentAnalysis.negative) {\n    responsePrompts.push({\n      type: 'appreciation',\n      template: 'Thank you for all the love and support! You all make my day brighter 💖',\n      use_case: 'general_positive_response'\n    });\n  }\n  \n  // Topic-specific responses\n  Object.entries(subscriberAnalysis.topicPreferences).forEach(([topic, count]) => {\n    if (count > 2) { // If topic is mentioned multiple times\n      responsePrompts.push({\n        type: 'topic_engagement',\n        template: `I love that you're interested in ${topic}! What would you like to see more of?`,\n        topic: topic,\n        use_case: 'topic_specific_response'\n      });\n    }\n  });\n  \n  // Generate personalized content suggestions\n  const contentSuggestions = await axios.post('http://localhost:5000/api/ai/generate-responses', {\n    subscriber_preferences: subscriberAnalysis.topicPreferences,\n    sentiment_analysis: subscriberAnalysis.sentimentAnalysis,\n    response_templates: responsePrompts\n  });\n  \n  return {\n    json: {\n      success: true,\n      generatedResponses: contentSuggestions.data.responses,\n      personalizedContent: contentSuggestions.data.content_suggestions,\n      subscriberInsights: subscriberAnalysis,\n      timestamp: new Date().toISOString()\n    }\n  };\n  \n} catch (error) {\n  console.error('AI response generation failed:', error);\n  return {\n    json: {\n      success: false,\n      error: error.message,\n      subscriberInsights: subscriberAnalysis\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "8",
+      "name": "Store Subscriber Insights",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [850, 500],
+      "parameters": {
+        "operation": "insert",
+        "table": "subscriber_insights",
+        "columns": [
+          "timestamp",
+          "total_interactions",
+          "sentiment_analysis",
+          "topic_preferences",
+          "ai_responses_generated",
+          "recommendations"
+        ],
+        "values": [
+          "={{$json.timestamp}}",
+          "={{$json.subscriberInsights.totalInteractions}}",
+          "={{JSON.stringify($json.subscriberInsights.sentimentAnalysis)}}",
+          "={{JSON.stringify($json.subscriberInsights.topicPreferences)}}",
+          "={{$json.success}}",
+          "={{JSON.stringify($json.subscriberInsights.recommendations)}}"
+        ]
+      }
+    }
+  ],
+  "connections": {
+    "Hourly Analysis Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Platform Data",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Subscriber Interaction Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Platform Data": {
+      "main": [
+        [
+          {
+            "node": "Analyze Engagement Patterns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Engagement Patterns": {
+      "main": [
+        [
+          {
+            "node": "Update Learning Model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Learning Model": {
+      "main": [
+        [
+          {
+            "node": "Store Analytics Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subscriber Interaction Analysis": {
+      "main": [
+        [
+          {
+            "node": "AI Response Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Response Generation": {
+      "main": [
+        [
+          {
+            "node": "Store Subscriber Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "timezone": "Europe/Oslo",
+    "saveManualExecutions": true
+  },
+  "staticData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [
+    {
+      "id": "1",
+      "name": "FionaSparx",
+      "color": "#FF6B6B"
+    },
+    {
+      "id": "3",
+      "name": "Analytics",
+      "color": "#45B7D1"
+    },
+    {
+      "id": "4",
+      "name": "AI Learning",
+      "color": "#96CEB4"
+    }
+  ]
+}

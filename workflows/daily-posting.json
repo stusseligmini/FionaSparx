@@ -1,0 +1,290 @@
+{
+  "name": "FionaSparx Daily Content Posting",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "hour": [8, 12, 17, 20],
+          "minute": [0],
+          "timezone": "Europe/Oslo"
+        }
+      }
+    },
+    {
+      "id": "2", 
+      "name": "Content Generation",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "parameters": {
+        "functionCode": "// AI Content Generation Node\nconst axios = require('axios');\n\n// Generate content for current hour\nconst currentHour = new Date().getHours();\nlet contentType, platform;\n\n// Smart scheduling based on time\nif (currentHour === 8) {\n  contentType = 'morning_motivation';\n  platform = 'fanvue';\n} else if (currentHour === 12) {\n  contentType = 'lifestyle';\n  platform = 'loyalfans';\n} else if (currentHour === 17) {\n  contentType = 'afternoon_update';\n  platform = 'fanvue';\n} else if (currentHour === 20) {\n  contentType = 'evening_thoughts';\n  platform = 'loyalfans';\n}\n\n// Call FionaSparx API to generate content\ntry {\n  const response = await axios.post('http://localhost:5000/api/generate', {\n    platform: platform,\n    type: contentType,\n    count: 1\n  });\n  \n  return {\n    json: {\n      content: response.data.content,\n      platform: platform,\n      type: contentType,\n      timestamp: new Date().toISOString()\n    }\n  };\n} catch (error) {\n  console.error('Content generation failed:', error);\n  return {\n    json: {\n      error: 'Content generation failed',\n      platform: platform,\n      type: contentType,\n      timestamp: new Date().toISOString()\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "3",
+      "name": "Quality Check",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "parameters": {
+        "functionCode": "// Quality Assessment Node\nconst content = $input.first().json;\n\nif (content.error) {\n  return [null, content]; // Route to error handler\n}\n\n// Check content quality\nconst qualityScore = content.content.quality_score || 3.0;\nconst minQuality = 3.5;\n\nif (qualityScore >= minQuality) {\n  return [content, null]; // Route to posting\n} else {\n  return [null, {\n    ...content,\n    reason: 'Quality score too low',\n    score: qualityScore,\n    threshold: minQuality\n  }]; // Route to regeneration\n}"
+      },
+      "outputs": [
+        { "main": [{ "category": "approved" }] },
+        { "main": [{ "category": "rejected" }] }
+      ]
+    },
+    {
+      "id": "4",
+      "name": "Platform Router",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "parameters": {
+        "rules": {
+          "rules": [
+            {
+              "operation": "equal",
+              "value1": "={{$json.platform}}",
+              "value2": "fanvue"
+            },
+            {
+              "operation": "equal", 
+              "value1": "={{$json.platform}}",
+              "value2": "loyalfans"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "5",
+      "name": "Post to Fanvue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1050, 150],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fanvue.com/v1/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headers": {
+          "Authorization": "Bearer {{$credentials.fanvue.api_key}}"
+        },
+        "body": {
+          "content": "={{$json.content.caption}}",
+          "image": "={{$json.content.image_path}}",
+          "scheduled_at": "={{$json.timestamp}}"
+        }
+      }
+    },
+    {
+      "id": "6",
+      "name": "Post to LoyalFans",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1050, 250],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.loyalfans.com/v1/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headers": {
+          "Authorization": "Bearer {{$credentials.loyalfans.api_key}}"
+        },
+        "body": {
+          "content": "={{$json.content.caption}}",
+          "image": "={{$json.content.image_path}}",
+          "scheduled_at": "={{$json.timestamp}}"
+        }
+      }
+    },
+    {
+      "id": "7",
+      "name": "Cross-platform Promotion",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1250, 200],
+      "parameters": {
+        "functionCode": "// Cross-platform marketing\nconst axios = require('axios');\nconst originalPost = $input.first().json;\n\n// Generate promotional content for other platforms\nconst promoContent = {\n  instagram: `New content just dropped! Check it out 🔥 #newpost #exclusive`,\n  twitter: `💫 Fresh content alert! You know where to find me 😘`,\n  tiktok: `Behind the scenes of my latest post 📸 Link in bio!`\n};\n\n// Post to social media platforms\nconst promises = [];\n\n// Instagram Story\nif (process.env.INSTAGRAM_ENABLED === 'true') {\n  promises.push(\n    axios.post('https://graph.facebook.com/v18.0/me/media', {\n      image_url: originalPost.content.image_path,\n      caption: promoContent.instagram,\n      access_token: process.env.INSTAGRAM_ACCESS_TOKEN\n    })\n  );\n}\n\n// Twitter\nif (process.env.TWITTER_ENABLED === 'true') {\n  promises.push(\n    axios.post('https://api.twitter.com/2/tweets', {\n      text: promoContent.twitter\n    }, {\n      headers: {\n        'Authorization': `Bearer ${process.env.TWITTER_BEARER_TOKEN}`\n      }\n    })\n  );\n}\n\ntry {\n  await Promise.all(promises);\n  return {\n    json: {\n      success: true,\n      originalPost: originalPost,\n      crossPlatformPosts: promoContent,\n      timestamp: new Date().toISOString()\n    }\n  };\n} catch (error) {\n  console.error('Cross-platform posting failed:', error);\n  return {\n    json: {\n      success: false,\n      error: error.message,\n      originalPost: originalPost\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "8",
+      "name": "Analytics Logger",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1450, 200],
+      "parameters": {
+        "operation": "insert",
+        "table": "content_analytics",
+        "columns": [
+          "post_id",
+          "platform", 
+          "content_type",
+          "quality_score",
+          "posted_at",
+          "cross_platform_success"
+        ],
+        "values": [
+          "={{$json.originalPost.content.id}}",
+          "={{$json.originalPost.platform}}",
+          "={{$json.originalPost.type}}",
+          "={{$json.originalPost.content.quality_score}}",
+          "={{$json.timestamp}}",
+          "={{$json.success}}"
+        ]
+      }
+    },
+    {
+      "id": "9",
+      "name": "Content Regeneration",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 450],
+      "parameters": {
+        "functionCode": "// Regenerate content if quality check failed\nconst axios = require('axios');\nconst failedContent = $input.first().json;\n\n// Try to regenerate with different parameters\ntry {\n  const response = await axios.post('http://localhost:5000/api/regenerate', {\n    platform: failedContent.platform,\n    type: failedContent.type,\n    previousScore: failedContent.score,\n    improvements: ['more_engaging', 'better_hashtags']\n  });\n  \n  return {\n    json: {\n      content: response.data.content,\n      platform: failedContent.platform,\n      type: failedContent.type,\n      attempt: 2,\n      timestamp: new Date().toISOString()\n    }\n  };\n} catch (error) {\n  console.error('Content regeneration failed:', error);\n  return {\n    json: {\n      error: 'Regeneration failed',\n      originalContent: failedContent\n    }\n  };\n}"
+      }
+    },
+    {
+      "id": "10",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 450],
+      "parameters": {
+        "functionCode": "// Handle errors and log them\nconst error = $input.first().json;\n\nconsole.error('Workflow error:', error);\n\n// Send notification to admin\nconst notification = {\n  type: 'workflow_error',\n  message: `Daily posting workflow failed: ${error.error || error.reason}`,\n  data: error,\n  timestamp: new Date().toISOString()\n};\n\nreturn { json: notification };"
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Content Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Generation": {
+      "main": [
+        [
+          {
+            "node": "Quality Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Check": {
+      "main": [
+        [
+          {
+            "node": "Platform Router",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Content Regeneration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Platform Router": {
+      "main": [
+        [
+          {
+            "node": "Post to Fanvue",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Post to LoyalFans",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Fanvue": {
+      "main": [
+        [
+          {
+            "node": "Cross-platform Promotion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to LoyalFans": {
+      "main": [
+        [
+          {
+            "node": "Cross-platform Promotion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cross-platform Promotion": {
+      "main": [
+        [
+          {
+            "node": "Analytics Logger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Regeneration": {
+      "main": [
+        [
+          {
+            "node": "Quality Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "timezone": "Europe/Oslo",
+    "saveManualExecutions": true
+  },
+  "staticData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": [
+    {
+      "id": "1",
+      "name": "FionaSparx",
+      "color": "#FF6B6B"
+    },
+    {
+      "id": "2", 
+      "name": "Content Automation",
+      "color": "#4ECDC4"
+    }
+  ]
+}

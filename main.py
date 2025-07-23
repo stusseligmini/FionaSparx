@@ -13,7 +13,7 @@ Usage:
     python main.py quality         # Assess content quality
     python main.py automation      # Start N8N automation system
     python main.py webhook-test    # Test webhook endpoints
-    python main.py schedule        # Get scheduling recommendations
+    python main.py personality     # Test AI personality engine
 """
 
 import os
@@ -21,6 +21,7 @@ import sys
 import logging
 import json
 from pathlib import Path
+from datetime import datetime
 
 # Add src to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -734,6 +735,80 @@ def main():
             print(f"  Best hours: {', '.join([h['hour'] for h in analytics['best_hours'][:3]])}")
             print(f"  Best days: {', '.join([d['day'] for d in analytics['best_days'][:3]])}")
             
+        elif command == "personality":
+            ConsoleUI.print_section("Testing AI Personality Engine")
+            
+            # Import personality engine
+            from n8n_automation.personality_engine import (
+                AdvancedPersonalityEngine, EngagementContext, 
+                CulturalContext, CommunicationStyle, EmotionalTone
+            )
+            
+            # Initialize personality engine
+            personality_engine = AdvancedPersonalityEngine()
+            
+            # Test different contexts
+            test_contexts = [
+                {
+                    "platform": "fanvue",
+                    "time": datetime.now().replace(hour=9),  # Morning
+                    "cultural": CulturalContext.WESTERN,
+                    "sentiment": "positive",
+                    "description": "Morning Fanvue Post (Western audience, positive sentiment)"
+                },
+                {
+                    "platform": "loyalfans", 
+                    "time": datetime.now().replace(hour=21),  # Evening
+                    "cultural": CulturalContext.EUROPEAN,
+                    "sentiment": None,
+                    "description": "Evening LoyalFans Post (European audience)"
+                },
+                {
+                    "platform": "instagram",
+                    "time": datetime.now().replace(hour=15),  # Afternoon
+                    "cultural": CulturalContext.INTERNATIONAL,
+                    "sentiment": "excited",
+                    "description": "Afternoon Instagram Post (International audience, excited sentiment)"
+                }
+            ]
+            
+            base_content = "Feeling amazing today and wanted to share this moment with you all!"
+            
+            for i, test_ctx in enumerate(test_contexts, 1):
+                ConsoleUI.print_info(f"Test {i}: {test_ctx['description']}")
+                
+                context = EngagementContext(
+                    platform=test_ctx["platform"],
+                    time_of_day=test_ctx["time"],
+                    follower_sentiment=test_ctx["sentiment"],
+                    cultural_context=test_ctx["cultural"],
+                    engagement_history=[0.1, 0.15, 0.12, 0.18, 0.14]  # Sample history
+                )
+                
+                # Generate personality-adapted content
+                response = personality_engine.generate_personality_content(base_content, context)
+                
+                print(f"  Style: {response.style.value}")
+                print(f"  Tone: {response.emotional_tone.value}")
+                print(f"  Confidence: {response.confidence:.1%}")
+                print(f"  Adapted Content: {response.content}")
+                print(f"  Reasoning: {response.reasoning[0] if response.reasoning else 'N/A'}")
+                print(f"  Adaptations: {', '.join(response.adaptations_made) if response.adaptations_made else 'None'}")
+                print()
+            
+            # Show personality analytics
+            analytics = personality_engine.analyze_personality_performance()
+            ConsoleUI.print_info("Personality Performance Analytics:")
+            print(f"  Total generations: {analytics.get('total_generations', 0)}")
+            print(f"  Average confidence: {analytics.get('average_confidence', 0):.1%}")
+            
+            if analytics.get('style_distribution'):
+                top_style = max(analytics['style_distribution'].items(), key=lambda x: x[1])
+                print(f"  Most used style: {top_style[0]} ({top_style[1]} times)")
+            
+            if analytics.get('recommendations'):
+                print(f"  Recommendations: {len(analytics['recommendations'])} suggestions available")
+            
             
         else:
             ConsoleUI.print_error("Unknown command!")
@@ -746,6 +821,7 @@ def main():
             print("  automation - Start N8N automation system")
             print("  webhook-test - Test webhook endpoints")
             print("  schedule   - Get scheduling recommendations")
+            print("  personality - Test AI personality engine")
             
     except Exception as e:
         ConsoleUI.print_error(f"Error executing command '{command}': {e}")

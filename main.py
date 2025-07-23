@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 FionaSparx AI Content Creator - Main Entry Point
-Optimized for Fanvue and LoyalFans content generation
+Optimized for Fanvue and LoyalFans content generation with N8N Automation
 
 Usage:
     python main.py                 # Run basic test
@@ -11,6 +11,9 @@ Usage:
     python main.py loyalfans       # Generate LoyalFans-optimized content
     python main.py test            # Test all components
     python main.py quality         # Assess content quality
+    python main.py automation      # Start N8N automation system
+    python main.py webhook-test    # Test webhook endpoints
+    python main.py personality     # Test AI personality engine
 """
 
 import os
@@ -18,6 +21,7 @@ import sys
 import logging
 import json
 from pathlib import Path
+from datetime import datetime
 
 # Add src to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -27,10 +31,13 @@ from ai_model.text_generator import SmartTextGenerator
 from utils.logger import setup_logging
 
 # Import nye funksjoner
-from utils.error_handling import CircuitBreaker, retry, FallbackHandler
-from utils.cli_progress import ProgressBar, ConsoleUI, ProgressStyle
-from utils.quality_assessment import ContentQualityAssessor, ContentType, QualityLevel
+from utils.Error_handling import CircuitBreaker, retry, FallbackHandler
+from utils.cli_progress import ProgressBar, ConsoleUI, ProgressStyle, Colors
+from utils.quality_assesment import ContentQualityAssessor, ContentType, QualityLevel
 from utils.platform_templates import PlatformTemplateManager
+
+# Import N8N automation system
+from n8n_automation.automation_manager import N8NAutomationManager, create_n8n_automation
 
 # Set up basic logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -40,7 +47,7 @@ class FionaSparxSimple:
     """Simplified main entry point for FionaSparx AI Content Creator"""
     
     def __init__(self, config=None):
-        ConsoleUI.print_header("FionaSparx AI Content Creator", color=ConsoleUI.Colors.BLUE)
+        ConsoleUI.print_header("FionaSparx AI Content Creator", color=Colors.BLUE)
         logger.info("🚀 Initializing FionaSparx AI Content Creator...")
         
         # Create required directories
@@ -640,6 +647,168 @@ def main():
         elif command == "quality":
             ConsoleUI.print_section("Running Content Quality Assessment")
             fiona.assess_content_quality()
+        
+        elif command == "automation":
+            ConsoleUI.print_section("Starting N8N Automation System")
+            automation = create_n8n_automation(fiona)
+            
+            async def run_automation():
+                try:
+                    await automation.start()
+                except KeyboardInterrupt:
+                    ConsoleUI.print_info("Received shutdown signal")
+                    await automation.stop()
+                except Exception as e:
+                    ConsoleUI.print_error(f"Automation system error: {e}")
+                    await automation.stop()
+                    raise
+            
+            import asyncio
+            asyncio.run(run_automation())
+        
+        elif command == "webhook-test":
+            ConsoleUI.print_section("Testing Webhook Endpoints")
+            automation = create_n8n_automation(fiona)
+            
+            # Test webhook functionality
+            async def test_webhooks():
+                await automation.webhook_server.start_server("localhost", 8080)
+                
+                # Simulate webhook requests
+                test_requests = [
+                    {
+                        "method": "POST",
+                        "path": "/webhooks/generate-content",
+                        "headers": {"authorization": "Bearer default_token"},
+                        "body": '{"platform": "fanvue", "content_type": "lifestyle", "count": 1}',
+                        "source_ip": "127.0.0.1"
+                    },
+                    {
+                        "method": "GET", 
+                        "path": "/webhooks/health",
+                        "headers": {},
+                        "body": "",
+                        "source_ip": "127.0.0.1"
+                    }
+                ]
+                
+                for i, req in enumerate(test_requests):
+                    ConsoleUI.print_info(f"Testing webhook {i+1}: {req['method']} {req['path']}")
+                    result = await automation.webhook_server.handle_request(
+                        req["method"], req["path"], req["headers"], req["body"], req["source_ip"]
+                    )
+                    ConsoleUI.print_success(f"Response: {result['status']} - {result.get('event_id', 'N/A')}")
+                
+                await automation.webhook_server.stop_server()
+            
+            import asyncio
+            asyncio.run(test_webhooks())
+            
+        elif command == "schedule":
+            ConsoleUI.print_section("Getting Scheduling Recommendations")
+            automation = create_n8n_automation(fiona)
+            
+            # Get schedule recommendations for different platforms
+            from n8n_automation.smart_scheduling import Platform, ContentType
+            
+            platforms = [Platform.FANVUE, Platform.LOYALFANS, Platform.INSTAGRAM]
+            content_types = [ContentType.LIFESTYLE, ContentType.FASHION, ContentType.ARTISTIC]
+            
+            for platform in platforms:
+                for content_type in content_types:
+                    recommendation = automation.scheduling_engine.get_optimal_schedule(
+                        platform, content_type
+                    )
+                    
+                    ConsoleUI.print_info(f"{platform.value.title()} - {content_type.value.title()}:")
+                    print(f"  Optimal time: {recommendation.optimal_time.strftime('%Y-%m-%d %H:%M')}")
+                    print(f"  Confidence: {recommendation.confidence.value}")
+                    print(f"  Expected engagement: {recommendation.expected_engagement:.1%}")
+                    print(f"  Reasoning: {recommendation.reasoning[0] if recommendation.reasoning else 'N/A'}")
+                    print()
+            
+            # Show analytics
+            analytics = automation.scheduling_engine.get_schedule_analytics()
+            ConsoleUI.print_info("Scheduling Analytics (Last 30 days):")
+            print(f"  Total posts: {analytics['total_posts']}")
+            print(f"  Average engagement: {analytics['average_engagement']:.1%}")
+            print(f"  Best hours: {', '.join([h['hour'] for h in analytics['best_hours'][:3]])}")
+            print(f"  Best days: {', '.join([d['day'] for d in analytics['best_days'][:3]])}")
+            
+        elif command == "personality":
+            ConsoleUI.print_section("Testing AI Personality Engine")
+            
+            # Import personality engine
+            from n8n_automation.personality_engine import (
+                AdvancedPersonalityEngine, EngagementContext, 
+                CulturalContext, CommunicationStyle, EmotionalTone
+            )
+            
+            # Initialize personality engine
+            personality_engine = AdvancedPersonalityEngine()
+            
+            # Test different contexts
+            test_contexts = [
+                {
+                    "platform": "fanvue",
+                    "time": datetime.now().replace(hour=9),  # Morning
+                    "cultural": CulturalContext.WESTERN,
+                    "sentiment": "positive",
+                    "description": "Morning Fanvue Post (Western audience, positive sentiment)"
+                },
+                {
+                    "platform": "loyalfans", 
+                    "time": datetime.now().replace(hour=21),  # Evening
+                    "cultural": CulturalContext.EUROPEAN,
+                    "sentiment": None,
+                    "description": "Evening LoyalFans Post (European audience)"
+                },
+                {
+                    "platform": "instagram",
+                    "time": datetime.now().replace(hour=15),  # Afternoon
+                    "cultural": CulturalContext.INTERNATIONAL,
+                    "sentiment": "excited",
+                    "description": "Afternoon Instagram Post (International audience, excited sentiment)"
+                }
+            ]
+            
+            base_content = "Feeling amazing today and wanted to share this moment with you all!"
+            
+            for i, test_ctx in enumerate(test_contexts, 1):
+                ConsoleUI.print_info(f"Test {i}: {test_ctx['description']}")
+                
+                context = EngagementContext(
+                    platform=test_ctx["platform"],
+                    time_of_day=test_ctx["time"],
+                    follower_sentiment=test_ctx["sentiment"],
+                    cultural_context=test_ctx["cultural"],
+                    engagement_history=[0.1, 0.15, 0.12, 0.18, 0.14]  # Sample history
+                )
+                
+                # Generate personality-adapted content
+                response = personality_engine.generate_personality_content(base_content, context)
+                
+                print(f"  Style: {response.style.value}")
+                print(f"  Tone: {response.emotional_tone.value}")
+                print(f"  Confidence: {response.confidence:.1%}")
+                print(f"  Adapted Content: {response.content}")
+                print(f"  Reasoning: {response.reasoning[0] if response.reasoning else 'N/A'}")
+                print(f"  Adaptations: {', '.join(response.adaptations_made) if response.adaptations_made else 'None'}")
+                print()
+            
+            # Show personality analytics
+            analytics = personality_engine.analyze_personality_performance()
+            ConsoleUI.print_info("Personality Performance Analytics:")
+            print(f"  Total generations: {analytics.get('total_generations', 0)}")
+            print(f"  Average confidence: {analytics.get('average_confidence', 0):.1%}")
+            
+            if analytics.get('style_distribution'):
+                top_style = max(analytics['style_distribution'].items(), key=lambda x: x[1])
+                print(f"  Most used style: {top_style[0]} ({top_style[1]} times)")
+            
+            if analytics.get('recommendations'):
+                print(f"  Recommendations: {len(analytics['recommendations'])} suggestions available")
+            
             
         else:
             ConsoleUI.print_error("Unknown command!")
@@ -649,6 +818,10 @@ def main():
             print("  fanvue     - Generate Fanvue-optimized content")
             print("  loyalfans  - Generate LoyalFans-optimized content")
             print("  quality    - Assess quality of existing content")
+            print("  automation - Start N8N automation system")
+            print("  webhook-test - Test webhook endpoints")
+            print("  schedule   - Get scheduling recommendations")
+            print("  personality - Test AI personality engine")
             
     except Exception as e:
         ConsoleUI.print_error(f"Error executing command '{command}': {e}")

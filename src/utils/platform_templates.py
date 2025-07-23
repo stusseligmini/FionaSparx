@@ -242,4 +242,47 @@ class PlatformTemplateManager:
                 {
                     "title": "Engasjerende spørsmål",
                     "structure": (
-                        "🤔 {introduksjonssp
+                        "🤔 {introduksjonsspørsmål}\n\n"
+                        "{hovedinnhold}\n\n"
+                        "💭 {spørsmål_til_følgere}\n\n"
+                        "{hashtags}"
+                    ),
+                    "elements": [
+                        "introduksjonsspørsmål",
+                        "hovedinnhold", 
+                        "spørsmål_til_følgere",
+                        "hashtags"
+                    ]
+                }
+            ]
+        }
+    
+    def get_template(self, platform, template_type):
+        """Hent en mal for en spesifikk plattform og type"""
+        if platform == "fanvue":
+            templates = self.fanvue_templates.get(template_type, [])
+        elif platform == "loyalfans":
+            templates = self.loyalfans_templates.get(template_type, [])
+        else:
+            templates = self.generic_templates.get(template_type, [])
+        
+        if templates:
+            # Returner første mal som standard
+            return templates[0]
+        else:
+            # Fallback til generisk mal
+            return {
+                "title": "Generisk mal",
+                "structure": "{hovedinnhold}\n\n{hashtags}",
+                "elements": ["hovedinnhold", "hashtags"]
+            }
+    
+    def apply_template(self, template, content_data):
+        """Anvend mal på innholdsdata"""
+        try:
+            structure = template.get("structure", "{hovedinnhold}")
+            return structure.format(**content_data)
+        except KeyError as e:
+            logger.warning(f"Manglende nøkkel i innholdsdata: {e}")
+            # Fallback til enkel formatering
+            return f"{content_data.get('hovedinnhold', 'Innhold')}\n\n{content_data.get('hashtags', '')}"

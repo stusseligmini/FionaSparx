@@ -26,10 +26,10 @@ from ai_model.image_generator import AdvancedImageGenerator
 from ai_model.text_generator import SmartTextGenerator
 from utils.logger import setup_logging
 
-# Import nye funksjoner
-from utils.error_handling import CircuitBreaker, retry, FallbackHandler
-from utils.cli_progress import ProgressBar, ConsoleUI, ProgressStyle
-from utils.quality_assessment import ContentQualityAssessor, ContentType, QualityLevel
+# Import existing utilities with proper naming
+from utils.Error_handling import CircuitBreaker, retry, FallbackHandler
+from utils.cli_progress import ProgressBar, ConsoleUI, ProgressStyle, Colors
+from utils.quality_assesment import ContentQualityAssessor, ContentType, QualityLevel
 from utils.platform_templates import PlatformTemplateManager
 
 # Set up basic logging
@@ -40,7 +40,7 @@ class FionaSparxSimple:
     """Simplified main entry point for FionaSparx AI Content Creator"""
     
     def __init__(self, config=None):
-        ConsoleUI.print_header("FionaSparx AI Content Creator", color=ConsoleUI.Colors.BLUE)
+        ConsoleUI.print_header("FionaSparx AI Content Creator", color=Colors.BLUE)
         logger.info("🚀 Initializing FionaSparx AI Content Creator...")
         
         # Create required directories

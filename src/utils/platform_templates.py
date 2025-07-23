@@ -242,4 +242,101 @@ class PlatformTemplateManager:
                 {
                     "title": "Engasjerende spørsmål",
                     "structure": (
-                        "🤔 {introduksjonssp
+                        "🤔 {introduksjonsspørsmål}\n\n"
+                        "{hovedinnhold}\n\n"
+                        "Hva synes du? {direkte_spørsmål}\n\n"
+                        "{hashtags}"
+                    ),
+                    "emoji_suggestion": ["🤔", "💭", "❓", "🗣️", "💬"],
+                    "cta_options": [
+                        "Fortell meg i kommentarene!",
+                        "Hva er din erfaring?", 
+                        "Del dine tanker nedenfor",
+                        "Jeg vil gjerne høre fra deg!"
+                    ]
+                }
+            ],
+            "storytelling": [
+                {
+                    "title": "Personlig historie",
+                    "structure": (
+                        "✨ {åpning}\n\n"
+                        "{historie_del1}\n\n"
+                        "{historie_del2}\n\n"
+                        "💭 {refleksjon}\n\n"
+                        "{hashtags}"
+                    ),
+                    "emoji_suggestion": ["✨", "💖", "🌟", "❤️", "😊"],
+                    "cta_options": [
+                        "Kan du relatere til dette?",
+                        "Del din egen historie!",
+                        "Takk for at dere følger reisen min",
+                        "Se mer i bio"
+                    ]
+                }
+            ]
+        }
+        
+        # Create unified platform templates structure for easy access
+        self.platform_templates = {
+            "fanvue": self.fanvue_templates,
+            "loyalfans": self.loyalfans_templates,
+            "generic": self.generic_templates
+        }
+        
+        logger.info("✅ Platform Template Manager initialisert med alle maler")
+    
+    def get_template(self, platform: str, template_type: str = "general") -> Dict:
+        """Get a template for a specific platform and type"""
+        if platform in self.platform_templates:
+            platform_data = self.platform_templates[platform]
+            if template_type in platform_data and platform_data[template_type]:
+                return platform_data[template_type][0]  # Return first template
+            elif "general" in platform_data and platform_data["general"]:
+                return platform_data["general"][0]  # Fallback to general
+        
+        # Ultimate fallback - return a simple template
+        return {
+            "title": "Standard Template",
+            "structure": "{content}\n\n{hashtags}",
+            "emoji_suggestion": ["✨", "💫", "🌟"],
+            "cta_options": ["Let me know what you think!", "Share your thoughts below"]
+        }
+    
+    def get_all_templates(self, platform: str) -> Dict:
+        """Get all templates for a platform"""
+        return self.platform_templates.get(platform, {})
+    
+    def get_available_platforms(self) -> List[str]:
+        """Get list of available platforms"""
+        return list(self.platform_templates.keys())
+    
+    def get_template_types(self, platform: str) -> List[str]:
+        """Get available template types for a platform"""
+        if platform in self.platform_templates:
+            return list(self.platform_templates[platform].keys())
+        return []
+    
+    def apply_template(self, template: Dict, content: Dict) -> str:
+        """Apply content to a template structure"""
+        try:
+            structure = template.get("structure", "{content}")
+            
+            # Replace placeholders with content
+            formatted_content = structure.format(**content)
+            
+            # Add suggested emojis if not already present
+            emoji_suggestions = template.get("emoji_suggestion", [])
+            if emoji_suggestions and not any(emoji in formatted_content for emoji in emoji_suggestions):
+                # Add a random emoji from suggestions
+                import random
+                formatted_content = f"{random.choice(emoji_suggestions)} {formatted_content}"
+            
+            return formatted_content.strip()
+            
+        except Exception as e:
+            logger.warning(f"Error applying template: {e}")
+            # Fallback - just return the main content with hashtags
+            main_content = content.get("hovedinnhold_med_detaljer", content.get("content", ""))
+            hashtags = content.get("hashtags", "")
+            return f"{main_content}\n\n{hashtags}".strip()
